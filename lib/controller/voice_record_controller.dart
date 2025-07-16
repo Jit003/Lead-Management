@@ -42,7 +42,7 @@ class VoiceRecorderController extends GetxController {
 
     if (!statuses[Permission.microphone]!.isGranted ||
         !statuses[Permission.storage]!.isGranted) {
-      Get.snackbar("Permission Denied", "Microphone and storage permission required");
+      print("Microphone and storage permission required");
       await [Permission.microphone, Permission.storage].request();
     }
   }

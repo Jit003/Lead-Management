@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kredipal/controller/login-controller.dart';
 import '../models/attendance_history_model.dart';
 import '../services/attendance_history_api_services.dart';
@@ -102,11 +103,12 @@ class AttendanceHistoryController extends GetxController {
     selectedFilter.value = filter;
   }
 
-  String formatTime(String? timeString) {
-    if (timeString == null || timeString.isEmpty) return '--:--';
+
+  String formatTime(String? rawDateTime) {
+    if (rawDateTime == null) return '--:--';
     try {
-      DateTime dateTime = DateTime.parse(timeString);
-      return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      final dt = DateTime.parse(rawDateTime).toLocal(); // Convert to local time
+      return DateFormat('hh:mm').format(dt); // Example: 07:06 AM
     } catch (e) {
       return '--:--';
     }
@@ -115,7 +117,7 @@ class AttendanceHistoryController extends GetxController {
   String formatDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) return 'N/A';
     try {
-      DateTime date = DateTime.parse(dateString);
+      DateTime date = DateTime.parse(dateString).toLocal();
       return '${date.day}/${date.month}/${date.year}';
     } catch (e) {
       return dateString;
@@ -125,7 +127,7 @@ class AttendanceHistoryController extends GetxController {
   String formatDateWithDay(String? dateString) {
     if (dateString == null || dateString.isEmpty) return 'N/A';
     try {
-      DateTime date = DateTime.parse(dateString);
+      DateTime date = DateTime.parse(dateString).toLocal();
       List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       String weekday = weekdays[date.weekday - 1];
       return '$weekday, ${date.day}/${date.month}/${date.year}';

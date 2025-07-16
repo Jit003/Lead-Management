@@ -10,10 +10,12 @@ import 'package:kredipal/views/credit_card_screen.dart';
 import 'package:kredipal/views/task_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../controller/addleads_controller.dart';
 import '../controller/dashboard_controller.dart';
 import '../widgets/shimmer_widget.dart';
 import 'emi_cal_page.dart';
 import 'filtered_leads_screens.dart';
+import 'future_leads_form_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -31,6 +33,7 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
   final AuthController authController = Get.find<AuthController>();
   final DashboardController dashboardController =
       Get.put(DashboardController());
+
 
   @override
   void initState() {
@@ -93,6 +96,44 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: _buildHeaderContent(),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -20,
+                      right: -20,
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                    ),
+
+                    Positioned(
+                      top: 10,
+                      right: 60,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.05),
+                        ),
+                      ),
+                    ),
+
+                    Positioned(
+                      bottom: -10,
+                      left: -10,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.06),
+                        ),
                       ),
                     ),
                   ],
@@ -260,26 +301,78 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
                     height: 20,
                   ),
 
-                 Obx(()=> buildFutureLeadsCard(
-                   'Future Reference Leads',
-                   '${dashboardController.dashboardData.value.data?.futureLeads?.count ?? '0'}',
-                     onViewAll: () {
-                       final controller = Get.find<AllLeadsController>();
-                       final futureLeads = controller.filteredLeads
-                           .where((lead) => lead.status?.toLowerCase() == 'future_lead')
-                           .toList();
-
-                       Get.to(() => FilteredLeadsScreen(), arguments: futureLeads);
-                     }
+                  _buildEnhancedLoanProductsSection(isTablet),
 
 
-                 ),),
+                  GestureDetector(
+                    onTap: () {
+                      Get.to(() => FutureLeadFormScreen(), arguments: 'future_lead');
+                    },
+                    child: Container(
+                      width: double.infinity, // Full width
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 20.0),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white, // Changed to white
+                            Colors.purple.shade200, // Changed to a light purple
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(25.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.deepPurple.shade900.withOpacity(0.2), // Adjusted shadow for lighter background
+                            spreadRadius: 0,
+                            blurRadius: 20,
+                            offset: const Offset(0, 10), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.person_add_alt_1, // Eye-catching icon
+                            color: Colors.deepPurple, // Adjusted icon color for lighter background
+                            size: 40.0,
+                          ),
+                          SizedBox(height: 15.0),
+                          Text(
+                            'Future Reference Lead', // Changed text
+                            style: TextStyle(
+                              color: Colors.deepPurple, // Adjusted text color for lighter background
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          // Removed the subheading here
+                        ],
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(
                     height: 20,
                   ),
 
-                  _buildEnhancedLoanProductsSection(isTablet),
+                  Obx(()=> buildFutureLeadsCard(
+                      'Future Reference Leads',
+                      '${dashboardController.dashboardData.value.data?.futureLeads?.count ?? '0'}',
+                      onViewAll: () {
+                        final controller = Get.find<AllLeadsController>();
+                        final futureLeads = controller.filteredLeads
+                            .where((lead) => lead.status?.toLowerCase() == 'future_lead')
+                            .toList();
+
+                        Get.to(() => FilteredLeadsScreen(), arguments: futureLeads);
+                      }
+
+
+                  ),),
 
 
                   // Quick Actions Section

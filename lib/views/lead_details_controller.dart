@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controller/forward_lead_controller.dart';
 import '../models/all_leads_model.dart';
 import '../services/lead_api_service.dart';
 
@@ -29,6 +30,8 @@ class LeadDetailsController extends GetxController {
 
       final response = await _apiService.getLeadDetails(leadId);
       leadDetails.value = response;
+      final forwardDropdownController = Get.find<ForwardDropdownController>();
+      await forwardDropdownController.loadForwardStatus(response.id!);
 
     } catch (e) {
       errorMessage.value = e.toString();

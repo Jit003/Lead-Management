@@ -5,14 +5,19 @@ class AttendanceStatus {
   String? checkInTime;
   String? checkOutTime;
   double? workedHours;
+  int? attendanceId; // 👈 ADD THIS
 
-  AttendanceStatus(
-      {this.status,
-        this.message,
-        this.buttonAction,
-        this.checkInTime,
-        this.checkOutTime,
-        this.workedHours});
+
+  AttendanceStatus({
+    this.status,
+    this.message,
+    this.buttonAction,
+    this.checkInTime,
+    this.checkOutTime,
+    this.workedHours,
+    this.attendanceId,
+
+  });
 
   AttendanceStatus.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -20,17 +25,23 @@ class AttendanceStatus {
     buttonAction = json['button_action'];
     checkInTime = json['check_in_time'];
     checkOutTime = json['check_out_time'];
-    workedHours = json['worked_hours'];
+
+    // ✅ Safely handle both int and double
+    workedHours = json['worked_hours'] != null
+        ? (json['worked_hours'] as num).toDouble()
+        : null;
+    attendanceId = json['attendance_id']; // 👈 HERE
+
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    data['button_action'] = this.buttonAction;
-    data['check_in_time'] = this.checkInTime;
-    data['check_out_time'] = this.checkOutTime;
-    data['worked_hours'] = this.workedHours;
-    return data;
+    return {
+      'status': status,
+      'message': message,
+      'button_action': buttonAction,
+      'check_in_time': checkInTime,
+      'check_out_time': checkOutTime,
+      'worked_hours': workedHours,
+    };
   }
 }

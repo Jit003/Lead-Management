@@ -14,6 +14,16 @@ class ProfileUpdateController extends GetxController {
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
 
+  @override
+  void onInit() {
+    super.onInit();
+
+    nameController.text = authController.userData['name'] ?? '';
+    phoneController.text = authController.userData['phone'] ?? '';
+    addressController.text = authController.userData['address'] ?? '';
+  }
+
+
   Future<void> updateProfile() async {
     isUpdating.value = true;
 

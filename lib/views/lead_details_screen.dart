@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:kredipal/controller/edit_lead_controller.dart';
 import 'package:kredipal/views/edit_lead_screen.dart';
 import 'package:kredipal/widgets/custom_app_bar.dart';
 import 'package:kredipal/widgets/custom_button.dart';
 import 'package:kredipal/widgets/follow_up_bottom_sheet.dart';
 import 'package:kredipal/widgets/voice_new_screen.dart';
+import '../controller/forward_lead_controller.dart';
 import '../models/all_leads_model.dart';
 import '../services/url_helper.dart';
 import '../widgets/add_lead_widget/voice_record_section.dart';
+import '../widgets/lead_forward_widget.dart';
 import '../widgets/modern_audio_player.dart';
 import 'lead_details_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,6 +22,9 @@ class LeadDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LeadDetailsController controller = Get.put(LeadDetailsController());
+    final LeadEditController editController = Get.put(LeadEditController());
+    ForwardDropdownController forwardDropdownController =
+        Get.put(ForwardDropdownController());
 
     Future<void> makePhoneCall(String phoneNumber) async {
       var _url = Uri.parse('tel:$phoneNumber');
@@ -43,15 +49,13 @@ class LeadDetailsScreen extends StatelessWidget {
           actions: [
             Obx(() {
               final lead = controller.leadDetails.value;
-              if (lead == null || !lead.isPersonalLead!) {
-                return const SizedBox.shrink();
-              }
+              if (lead?.isPersonalLead != true) return const SizedBox.shrink();
               return TextButton(
                 onPressed: () {
                   Get.to(() => EditLeadsPage(leadId: lead!.id!));
                 },
-                child: Center(
-                  child: const Text(
+                child: const Center(
+                  child: Text(
                     'Edit',
                     style: TextStyle(
                       color: Colors.white,
@@ -108,16 +112,13 @@ class LeadDetailsScreen extends StatelessWidget {
                         'Date of Birth', controller.formatDate(lead.dob)),
                     _buildDetailRow(
                       'Location',
-                      [
-                        lead.state,
-                        lead.district,
-                        lead.city
-                      ].where((e) => e != null && e.isNotEmpty).join(', ').isNotEmpty
-                          ? [
-                        lead.state,
-                        lead.district,
-                        lead.city
-                      ].where((e) => e != null && e.isNotEmpty).join(', ')
+                      [lead.state, lead.district, lead.city]
+                              .where((e) => e != null && e.isNotEmpty)
+                              .join(', ')
+                              .isNotEmpty
+                          ? [lead.state, lead.district, lead.city]
+                              .where((e) => e != null && e.isNotEmpty)
+                              .join(', ')
                           : 'N/A',
                     ),
                   ],
@@ -134,8 +135,6 @@ class LeadDetailsScreen extends StatelessWidget {
                         controller.formatCurrency(lead.leadAmount)),
                     _buildDetailRow('Current Salary',
                         controller.formatCurrency(lead.salary)),
-                    _buildDetailRow('Success Percentage',
-                        '${lead.successPercentage ?? 0}%'),
                     _buildDetailRow(
                         'Expected Month', lead.expectedMonth ?? 'N/A'),
                     _buildDetailRow(
@@ -158,20 +157,6 @@ class LeadDetailsScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Team Information
-                _buildSectionCard(
-                  title: 'Team Information',
-                  icon: Icons.group,
-                  children: [
-                    _buildDetailRow('Employee', lead.employee?.name ?? 'N/A'),
-                    _buildDetailRow(
-                        'Employee Email', lead.employee?.email ?? 'N/A'),
-                    _buildDetailRow('Team Lead', lead.teamLead?.name ?? 'N/A'),
-                    _buildDetailRow(
-                        'Team Lead Phone', lead.teamLead?.phone ?? 'N/A'),
-                  ],
-                ),
 
                 if (lead.remarks != null && lead.remarks!.isNotEmpty) ...[
                   const SizedBox(height: 16),
@@ -243,39 +228,87 @@ class LeadDetailsScreen extends StatelessWidget {
                         text: 'Call',
                         onPressed: () {
                           makePhoneCall('+91${lead.phone}');
-                          print(
-                              "Audio  path from backend: ${controller.leadDetails.value!.voiceRecording}");
                         },
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Expanded(
-                      child: CustomButton(
-                        text: 'Follow Up',
-                        onPressed: () {
-                          Get.bottomSheet(
-                            FollowUpBottomSheet(leadId: lead.id.toString()),
-                            isScrollControlled: true,
-                            backgroundColor: Colors.white,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(20),
-                              ),
-                            ),
-                          );
-                        },
+                    // Expanded(
+                    //   child: CustomButton(
+                    //     text: 'Follow Up',
+                    //     onPressed: () {
+                    //       Get.bottomSheet(
+                    //         FollowUpBottomSheet(leadId: lead.id.toString()),
+                    //         isScrollControlled: true,
+                    //         backgroundColor: Colors.white,
+                    //         shape: const RoundedRectangleBorder(
+                    //           borderRadius: BorderRadius.vertical(
+                    //               top: Radius.circular(20)),
+                    //         ),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    if (lead.isPersonalLead!) const SizedBox(width: 5),
+                    if (lead.isPersonalLead!)
+                      Expanded(
+                        child: CustomButton(
+                          text: 'Delete',
+                          onPressed: () {
+                            Get.defaultDialog(
+                              title: 'Delete Lead',
+                              middleText:
+                                  'Are you sure you want to delete this lead?',
+                              textCancel: 'Cancel',
+                              textConfirm: 'Delete',
+                              confirmTextColor: Colors.white,
+                              buttonColor: Colors.red,
+                              onConfirm: () {
+                                print('Delete lead with ID: ${lead.id}');
+                                Get.back(); // Close dialog
+                                Get.back(); // Optionally close screen
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                ForwardDropdown(isForwarded: !lead.isPersonalLead!),
+                ForwardDropdown(
+                  onForwarded: (value) async {
+                    final controller = Get.find<ForwardDropdownController>();
+                    int leadId = lead.id ?? 0; // or any safe default
+                    final int forwardToId =
+                        _mapForwardTextToId(value, lead.teamLeadId);
+
+                    await controller.forwardLead(
+                      leadId: leadId,
+                      forwardToId: forwardToId,
+                      onResult: (msg) {
+                        print("Forward responses: $msg");
+                      },
+                    );
+                  },
+                ),
               ],
             ),
           );
         }),
       );
     });
+  }
+
+  int _mapForwardTextToId(String value, int? teamLeadId) {
+    switch (value) {
+      case 'Forward to TL':
+        return teamLeadId ?? 0; // fallback to 0 if null
+      case 'Forward to Operation':
+        return 4;
+      case 'Forward to Admin':
+        return 1;
+      default:
+        return 0;
+    }
   }
 
   Widget _buildHeaderCard(Leads lead, LeadDetailsController controller) {
@@ -504,70 +537,6 @@ class LeadDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class ForwardDropdown extends StatefulWidget {
-  final bool isForwarded;
-
-  const ForwardDropdown({super.key, required this.isForwarded});
-
-  @override
-  State<ForwardDropdown> createState() => _ForwardDropdownState();
-}
-
-class _ForwardDropdownState extends State<ForwardDropdown> {
-  String? _selectedOption;
-
-  final List<String> options = [
-    'Forward to TL',
-    'Forward to Operation',
-    'Forward to Admin',
-  ];
-
-  void _handleForward(String? value) {
-    if (value == null) return;
-
-    setState(() {
-      _selectedOption = value;
-    });
-
-    Get.snackbar(
-      'Forwarded',
-      'Lead has been $value',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      value: _selectedOption,
-      hint: const Text('Forward Lead'),
-      items: options.map((option) {
-        return DropdownMenuItem<String>(
-          value: option,
-          child: Text(option),
-        );
-      }).toList(),
-      onChanged: widget.isForwarded ? null : _handleForward,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: widget.isForwarded ? Colors.grey.shade300 : Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.orange),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-      ),
-      icon: const Icon(Icons.arrow_drop_down),
     );
   }
 }

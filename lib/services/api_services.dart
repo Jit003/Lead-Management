@@ -419,6 +419,14 @@ class ApiService {
     }
   }
 
+  Future<void> addFutureLead()async {
+    final url = Uri.parse('${ApiUrl.baseUrl}');
+    try{
+      final response = http.MultipartRequest('Post',url);
+    }
+        catch(e){}
+  }
+
 
 
 

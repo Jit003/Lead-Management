@@ -148,20 +148,20 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
                   _buildGorgeousOptionTile(
-                    Icons.receipt_long_outlined,
-                    "Salary Slip",
-                    "View payment details",
-                    Colors.green,
-                        () => Get.toNamed(AppRoutes.salarySlip),
-                  ),
-
-                  const SizedBox(height: 16),
-                  _buildGorgeousOptionTile(
                     Icons.history_outlined,
                     "Leave History",
                     "Track your records",
                     Colors.purple,
                         () => Get.toNamed(AppRoutes.leaveHistory),
+                  ),
+
+                  const SizedBox(height: 16),
+                  _buildGorgeousOptionTile(
+                    Icons.receipt_long_outlined,
+                    "Salary Slip",
+                    "View payment details",
+                    Colors.green,
+                        () => Get.toNamed(AppRoutes.salarySlip),
                   ),
 
                   const SizedBox(height: 16),

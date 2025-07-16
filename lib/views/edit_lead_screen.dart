@@ -190,16 +190,6 @@ class _EditLeadsPageState extends State<EditLeadsPage> {
           },
         ),
         const SizedBox(height: 20),
-        _buildModernTextField(
-          label: 'Location',
-          controller: editController.locationController,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter the location';
-            }
-            return null;
-          },
-        ),
       ],
     );
   }

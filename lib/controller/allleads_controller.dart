@@ -22,8 +22,7 @@ class AllLeadsController extends GetxController {
   final RxString selectedStatus = 'all'.obs;
   final RxString selectedLeadType = 'All'.obs;
   final RxString dateFilter = 'this_month'.obs;
-
-
+  final RxnString selectedMonth = RxnString(); // ✅ Add this line
 
 
   @override
@@ -38,6 +37,7 @@ class AllLeadsController extends GetxController {
   Future<void> fetchAllLeads({
     String? leadType,
     String? status,
+    String? expectedMonth,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
@@ -63,9 +63,11 @@ class AllLeadsController extends GetxController {
       final response = await _apiService.getAllLeads(
         leadType: leadType,
         status: status,
+        expectedMonth: expectedMonth,
         dateFilter: filterType,
         startDate: start,
         endDate: end,
+        search: searchQuery.value, // ✅ Include search here
       );
 
       if (response.status == 'success' && response.data != null) {
@@ -109,6 +111,26 @@ class AllLeadsController extends GetxController {
     );
   }
 
+  void updateExpectedMonth(String value) {
+    fetchAllLeads(
+      leadType: selectedLeadType.value == 'All' ? null : selectedLeadType.value,
+      status: selectedStatus.value == 'all' ? null : selectedStatus.value,
+      expectedMonth: value == 'All' ? null : value,
+    );
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+    fetchAllLeads(
+      leadType: selectedLeadType.value == 'All' ? null : selectedLeadType.value,
+      status: selectedStatus.value == 'all' ? null : selectedStatus.value,
+      startDate: startDate.value,
+      endDate: endDate.value,
+    );
+  }
+
+
+
 
   Color getStatusColor(String? status) {
     switch (status?.toLowerCase()) {
@@ -146,6 +168,8 @@ class AllLeadsController extends GetxController {
   void navigateToLeadDetails(Leads lead) {
     Get.toNamed(AppRoutes.leadDetails, arguments: lead);
   }
+
+
 
   String formatDate(DateTime date) {
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

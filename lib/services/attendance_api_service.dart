@@ -16,6 +16,8 @@ class AttendanceApiService {
     );
 
     if (response.statusCode == 200) {
+      print('the attendance status is ${response.body}');
+
       return AttendanceStatus.fromJson(json.decode(response.body));
     } else {
       print("Error status: ${response.statusCode}");
@@ -65,6 +67,8 @@ class AttendanceApiService {
       return json.decode(response.body);
     }
     print("Check-out error: ${response.statusCode}");
+    print("Check-out error: ${response.body}");
+
     return null;
   }
 }

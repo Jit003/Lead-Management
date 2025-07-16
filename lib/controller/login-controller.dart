@@ -23,6 +23,13 @@ class AuthController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  // 👇 Add this observable
+  var isPasswordVisible = false.obs;
+
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
+
   Future<void> loadToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token.value = prefs.getString('token') ?? '';

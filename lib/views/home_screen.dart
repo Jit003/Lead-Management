@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kredipal/views/all_leads.dart';
+import 'package:kredipal/views/all_leads_screen.dart';
 import 'package:kredipal/views/attendance_screen.dart';
 import 'package:kredipal/views/profile_screen.dart';
 

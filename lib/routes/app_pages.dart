@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:kredipal/routes/app_routes.dart';
 import 'package:kredipal/views/add_leads.dart';
-import 'package:kredipal/views/all_leads.dart';
+import 'package:kredipal/views/all_leads_screen.dart';
 import 'package:kredipal/views/attendance_history.dart';
 import 'package:kredipal/views/attendance_screen.dart';
 import 'package:kredipal/views/change_password_screen.dart';

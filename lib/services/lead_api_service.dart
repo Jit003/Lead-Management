@@ -31,8 +31,10 @@ class LeadsApiService extends getx.GetxService {
     String? leadType,
     String? status,
     String? dateFilter,
+    String? expectedMonth,
     String? startDate, // Add this
     String? endDate,   // Add this
+    String? search,
   }) async {
     try {
       Map<String, dynamic> queryParams = {};
@@ -42,6 +44,9 @@ class LeadsApiService extends getx.GetxService {
       }
       if (status != null && status.toLowerCase() != 'all') {
         queryParams['status'] = status;
+      }
+      if (expectedMonth != null && expectedMonth != 'All') {
+        queryParams['expected_month'] = expectedMonth;
       }
 
       if (startDate != null && startDate.isNotEmpty) {
@@ -55,6 +60,10 @@ class LeadsApiService extends getx.GetxService {
       if ((startDate != null && startDate.isNotEmpty) &&
           (endDate != null && endDate.isNotEmpty)) {
         queryParams['date_filter'] = 'date_range';
+      }
+
+      if (search != null && search.isNotEmpty) {
+        queryParams['search'] = search; // ✅ Add this
       }
 
       final response = await _dio.get('/api/leads', queryParameters: queryParams);
@@ -108,6 +117,17 @@ class LeadsApiService extends getx.GetxService {
       final response = await _dio.post('/api/leads/$leadId', data: data);
       if (response.statusCode != 200 || response.data['status'] != 'success') {
         throw Exception('Failed to update lead: ${response.data['message']}');
+      }
+    } catch (e) {
+      throw Exception('Error updating lead: $e');
+    }
+  }
+
+  Future<void> deleteLead(int leadId) async {
+    try {
+      final response = await _dio.delete('/api/leads/$leadId',);
+      if (response.statusCode != 200 || response.data['status'] != 'success') {
+        print('Failed to delete lead: ${response.data['message']}');
       }
     } catch (e) {
       throw Exception('Error updating lead: $e');

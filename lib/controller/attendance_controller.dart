@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../models/attendance_status_model.dart';
 import '../services/attendance_api_service.dart';
 import '../services/location_service.dart';
@@ -92,8 +94,11 @@ class AttendanceController extends GetxController {
     try {
       final position = await LocationService.getCurrentPosition();
       if (position != null) {
-        print( '${position.latitude},${position.longitude}');
-        return '${position.latitude},${position.longitude}';
+        final latitude = position.latitude.toStringAsFixed(6);
+        final longitude = position.longitude.toStringAsFixed(6);
+        final formatted = '$latitude,$longitude';
+        print('📍 Formatted Coordinates: $formatted');
+        return formatted;
       }
     } catch (e) {
       print('Location error: $e');
@@ -102,13 +107,20 @@ class AttendanceController extends GetxController {
   }
 
 
+
   Future<void> fetchAttendanceStatus() async {
     isLoading.value = true;
     final token = authController.token.value;
 
     final result = await apiService.fetchStatus(token);
+    print('the attendance status is $result');
     if (result != null) {
       attendanceStatus.value = result;
+      // ✅ Set check-in ID from status if available
+      if (result.attendanceId != null) {
+        checkInId.value = result.attendanceId!;
+        print("✅ Fetched check-in ID from status: ${checkInId.value}");
+      }
     }
     isLoading.value = false;
   }
@@ -132,9 +144,10 @@ class AttendanceController extends GetxController {
     );
 
     if (response != null && response['status'] == 'success') {
-      checkInId.value = response['data']['id'];
+      print('✅ Check-in ID received: ${response['data']['id']}');
+
       await fetchAttendanceStatus();
-      Get.snackbar('Success','checkin');
+      Get.snackbar('Success','checkin',backgroundColor: Colors.green);
     }
 
     isLoading.value = false;
@@ -148,6 +161,11 @@ class AttendanceController extends GetxController {
     File? image,
   }) async {
     isLoading.value = true;
+
+    print("📤 Attempting checkout with ID: $id");
+    print("📤 Coordinates: $coordinates");
+    print("📤 Location: $location");
+
 
     final response = await apiService.checkOut(
       authController.token.value,
@@ -163,9 +181,22 @@ class AttendanceController extends GetxController {
     if (response != null && response['status'] == 'success') {
       checkInId.value = 0;
       await fetchAttendanceStatus();
-      Get.snackbar('Success','checkin');
+      Get.snackbar('Success','checkOut',backgroundColor: Colors.red);
     }
 
     isLoading.value = false;
   }
+
+
+  String formatTime(String? rawDateTime) {
+    if (rawDateTime == null) return '--:--';
+    try {
+      final dt = DateTime.parse(rawDateTime).toLocal(); // Convert to local time
+      return DateFormat('hh:mm').format(dt); // Example: 07:06 AM
+    } catch (e) {
+      return '--:--';
+    }
+  }
+
+
 }

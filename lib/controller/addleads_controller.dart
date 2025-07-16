@@ -18,9 +18,7 @@ class AddLeadsController extends GetxController {
 
   final LeadsApiService leadsApiService = Get.find<LeadsApiService>();
 
-
   final RxBool isSaving = false.obs; // For saving lead
-
 
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
@@ -34,7 +32,10 @@ class AddLeadsController extends GetxController {
   final itReturnController = TextEditingController();
   final businessVintageController = TextEditingController();
   final RxString selectedVintageYear = '2'.obs;
-  List<String> vintageYearList = List.generate(10, (index) => '${index + 1}');// default value to pass validation// New field for Business Vintage
+  List<String> vintageYearList = List.generate(
+      10,
+      (index) =>
+          '${index + 1}'); // default value to pass validation// New field for Business Vintage
 
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
   RxString selectedSuccessRatio = ''.obs;
@@ -78,8 +79,6 @@ class AddLeadsController extends GetxController {
     'Subarnapur',
     'Sundargarh',
   ];
-
-
 
   final RxString selectedState = ''.obs;
   final RxString selectedDistrict = ''.obs;
@@ -154,6 +153,7 @@ class AddLeadsController extends GetxController {
       fetchStates();
     }
   }
+
   void setupWatchers() {
     ever(selectedState, (_) {
       if (selectedState.value.isNotEmpty &&
@@ -180,20 +180,11 @@ class AddLeadsController extends GetxController {
     });
   }
 
-
-
-
-
-
-
-
-
-
   Future<void> fetchStates() async {
     try {
       isFetching.value = true;
       final response =
-      await leadsApiService.fetchStates(token: authController.token.value);
+          await leadsApiService.fetchStates(token: authController.token.value);
       if (response['status'] == 'success') {
         final stateList = response['data'] ?? [];
         final uniqueStates = <String, Map<String, dynamic>>{};
@@ -208,7 +199,7 @@ class AddLeadsController extends GetxController {
         stateIdMap.assignAll({
           for (var state in uniqueStates.values)
             state['state_title'].toString():
-            int.parse(state['state_id'].toString())
+                int.parse(state['state_id'].toString())
         });
         selectedState.value = '';
         setupWatchers();
@@ -223,6 +214,7 @@ class AddLeadsController extends GetxController {
       isFetching.value = false;
     }
   }
+
   Future<void> fetchDistricts() async {
     if (!stateIdMap.containsKey(selectedState.value)) return;
     try {
@@ -244,7 +236,7 @@ class AddLeadsController extends GetxController {
         districtIdMap.assignAll({
           for (var district in uniqueDistricts.values)
             district['district_title'].toString():
-            int.parse(district['districtid'].toString())
+                int.parse(district['districtid'].toString())
         });
         if (!availableDistricts.contains(selectedDistrict.value)) {
           selectedDistrict.value = '';
@@ -261,6 +253,7 @@ class AddLeadsController extends GetxController {
       isFetching.value = false;
     }
   }
+
   Future<void> fetchCities() async {
     if (!districtIdMap.containsKey(selectedDistrict.value)) return;
     try {
@@ -298,13 +291,6 @@ class AddLeadsController extends GetxController {
     }
   }
 
-
-
-
-
-
-
-
   Future<void> createLead() async {
     isLoading.value = true;
 
@@ -326,9 +312,11 @@ class AddLeadsController extends GetxController {
           "district": selectedDistrict.value,
           "city": selectedCity.value,
           "company_name": companyNameController.text.trim(),
-          "lead_amount": (double.tryParse(leadAmountController.text) ?? 0.0).toString(),
+          "lead_amount":
+              (double.tryParse(leadAmountController.text) ?? 0.0).toString(),
           "salary": (double.tryParse(salaryController.text) ?? 0.0).toString(),
-          "success_percentage": (int.tryParse(selectedSuccessRatio.value) ?? 0).toString(),
+          "success_percentage":
+              (int.tryParse(selectedSuccessRatio.value) ?? 0).toString(),
           "expected_month": selectedMonth.value,
           "remarks": remarksController.text.trim(),
         });
@@ -344,22 +332,35 @@ class AddLeadsController extends GetxController {
           "state": selectedState.value,
           "district": selectedDistrict.value,
           "city": selectedCity.value,
-          "lead_amount": (double.tryParse(leadAmountController.text) ?? 0.0).toString(),
-          "turnover_amount": (double.tryParse(salaryController.text) ?? 0.0).toString(),
-          "business_budget": (double.tryParse(businessBudgetController.text) ?? 0.0).toString(),
+          "lead_amount":
+              (double.tryParse(leadAmountController.text) ?? 0.0).toString(),
+          "turnover_amount":
+              (double.tryParse(salaryController.text) ?? 0.0).toString(),
+          "business_budget":
+              (double.tryParse(businessBudgetController.text) ?? 0.0)
+                  .toString(),
           "it_return": itReturnController.text.trim(),
-          "vintage_year": selectedVintageYear.value,// New field, parsed as integer
-          "success_percentage": (int.tryParse(selectedSuccessRatio.value) ?? 0).toString(),
+          "vintage_year":
+              selectedVintageYear.value, // New field, parsed as integer
+          "success_percentage":
+              (int.tryParse(selectedSuccessRatio.value) ?? 0).toString(),
           "remarks": remarksController.text.trim(),
         });
-
-
       } else if (leadType == 'creditcard_loan') {
         body.addAll({
           "name": nameController.text.trim(),
           "phone": phoneController.text.trim(),
           "email": emailController.text.trim(),
           "bank_names": selectedBanks.toList(),
+        });
+      }
+      else if (leadType == 'future_lead') {
+        body.addAll({
+          "name": nameController.text.trim(),
+          "phone": phoneController.text.trim(),
+          "email":emailController.text.trim(),
+          "location": locationController.text.trim()
+
         });
       }
 
@@ -375,8 +376,11 @@ class AddLeadsController extends GetxController {
           backgroundColor: Colors.green, colorText: Colors.white);
 
       clearForm(leadType: leadTypeValue.value);
-      Get.toNamed(AppRoutes.leadSavedSuccess);
-      allLeadsController.fetchAllLeads();
+      if (leadType == 'future_lead') {
+        Get.back(); // 👈 custom future lead screen
+      } else {
+        Get.toNamed(AppRoutes.leadSavedSuccess);  // 👈 default lead success screen
+      }      allLeadsController.fetchAllLeads();
       dashboardController.loadDashboardData();
     } catch (e) {
       print("Error during createLead: $e");

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:kredipal/widgets/custom_app_bar.dart';
 import '../controller/allleads_controller.dart';
 import '../models/all_leads_model.dart';
+import '../widgets/expected_month_bottom_sheet.dart';
 
 class AllLeadsScreen extends StatelessWidget {
   const AllLeadsScreen({Key? key}) : super(key: key);
@@ -12,9 +13,52 @@ class AllLeadsScreen extends StatelessWidget {
     final AllLeadsController controller = Get.put(AllLeadsController());
 
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'All Lead',
+      appBar: CustomAppBar(
+        title: 'All Leads',
         showBackButton: false,
+        actions: [
+
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.filter_list_outlined),
+                onPressed: () {
+                  Get.bottomSheet(
+                    AllLeadsFilterBottomSheet(),
+                    isScrollControlled: true,
+                    backgroundColor: Colors.white,
+                  );
+                },
+              ),
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Obx(() {
+                  final count = controller.filteredLeads.length;
+                  return count > 0
+                      ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                      : const SizedBox.shrink();
+                }),
+              ),
+            ],
+          ),
+
+
+        ],
       ),
       backgroundColor: const Color(0xFFF5F7FA),
       body: Column(
@@ -25,42 +69,35 @@ class AllLeadsScreen extends StatelessWidget {
             color: Colors.white,
             child: Column(
               children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Obx(() => Row(
-                        children: [
-                          _buildFilterLeadType('All', 'All', controller),
-                          _buildFilterLeadType('Home Loan', 'home_loan', controller),
-                          _buildFilterLeadType(
-                              'Personal Loan', 'personal_loan', controller),
-                          _buildFilterLeadType(
-                              'Business Loan', 'business_loan', controller),
-                        ],
-                      )),
-                ),
 
-                const SizedBox(height: 12),
+                TextField(
+                  onChanged: controller.updateSearchQuery,
+                  decoration: InputDecoration(
+                    hintText: 'Search leads ...',
+                    hintStyle: const TextStyle(
+                      color: Colors.black
+                    ),
+                    prefixIcon: const Icon(Icons.search, color: Colors.black),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 16,color: Colors.black,fontWeight: FontWeight.bold),
+                ),
 
                 // Status Filter
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Obx(() => Row(
-                        children: [
-                          _buildFilterChip('Personal Leads', 'all', controller),
-                          _buildFilterChip(
-                              'Authorized Leads', 'authorized', controller),
-                          _buildFilterChip(
-                              'Pending Leads', 'pending', controller),
-                          _buildFilterChip(
-                              'Approved Leads', 'approved', controller),
-                          _buildFilterChip(
-                              'Disbursed Leads', 'disbursed', controller), // Changed from 'completed' to 'disbursed'
-
-                          _buildFilterChip(
-                              'Rejected Leads', 'rejected', controller),
-                        ],
-                      )),
-                ),
               ],
             ),
           ),
@@ -89,7 +126,12 @@ class AllLeadsScreen extends StatelessWidget {
               }
 
               return RefreshIndicator(
-                onRefresh: controller.fetchAllLeads,
+                onRefresh: () async {
+                  controller.selectedMonth.value = 'All';
+                  controller.selectedLeadType.value = 'All';
+                  controller.selectedStatus.value = 'all';
+                  await controller.fetchAllLeads();
+                },
                 color: const Color(0xFF2C3E50),
                 child: ListView.builder(
                   padding: const EdgeInsets.only(
@@ -99,8 +141,7 @@ class AllLeadsScreen extends StatelessWidget {
                       right: 10),
                   itemCount: filteredLeads.length,
                   itemBuilder: (context, index) {
-                    final lead =
-                        filteredLeads[index];
+                    final lead = filteredLeads[index];
                     return _buildLeadCard(lead, controller);
                   },
                 ),
@@ -112,109 +153,6 @@ class AllLeadsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterChip(
-      String label, String value, AllLeadsController controller) {
-    final isSelected = controller.selectedStatus.value == value;
-
-    // Get count and amount based on the filter value
-    int count = 0;
-    String amount = '₹0';
-
-    final aggregates = controller.aggregates.value;
-
-    if (aggregates != null) {
-      switch (value) {
-        case 'all':
-          count = aggregates.totalLeads?.count ?? 0;
-          amount = controller
-              .formatCurrency(aggregates.totalLeads?.totalAmount ?? '0');
-          break;
-        case 'approved':
-          count = aggregates.approvedLeads?.count ?? 0;
-          amount = controller
-              .formatCurrency(aggregates.approvedLeads?.totalAmount ?? '0');
-          break;
-        case 'pending':
-          count = aggregates.pendingLeads?.count ?? 0;
-          amount = controller
-              .formatCurrency(aggregates.pendingLeads?.totalAmount ?? '0');
-          break;
-        case 'disbursed': // Updated to match API
-          count = aggregates.disbursedLeads?.count ?? 0;
-          amount = controller
-              .formatCurrency(aggregates.disbursedLeads?.totalAmount ?? '0');
-          break;
-        case 'rejected': // Updated to match API
-          count = aggregates.rejectedLeads?.count ?? 0;
-          amount = controller
-              .formatCurrency(aggregates.rejectedLeads?.totalAmount ?? '0');
-          break;
-      }
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Column(
-        children: [
-          FilterChip(
-            label: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(label),
-                const SizedBox(height: 2),
-                Text(
-                  '$count  / $amount',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        isSelected ? const Color(0xFF2C3E50) : Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
-            selected: isSelected,
-            onSelected: (selected) {
-              controller.updateStatusFilter(value);
-            },
-            selectedColor: Colors.orange.withOpacity(0.7),
-            checkmarkColor: const Color(0xFF2C3E50),
-            labelStyle: TextStyle(
-              color: isSelected ? const Color(0xFF2C3E50) : Colors.grey[600],
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          const SizedBox(height: 4),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterLeadType(
-      String label, String value, AllLeadsController controller) {
-    final isSelected = controller.selectedLeadType.value == value;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Column(
-        children: [
-          FilterChip(
-            label: Text(label),
-            selected: isSelected,
-            onSelected: (selected) {
-              controller.updateStatusLeadType(value);
-            },
-            selectedColor: Colors.orange.withOpacity(0.7),
-            labelStyle: TextStyle(
-              color: isSelected ? const Color(0xFF2C3E50) : Colors.grey[600],
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          const SizedBox(height: 4),
-        ],
-      ),
-    );
-  }
 
 
   Widget _buildLeadCard(Leads lead, AllLeadsController controller) {
@@ -315,7 +253,7 @@ class AllLeadsScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-               ),
+                ),
 
                 const SizedBox(height: 16),
 

@@ -19,6 +19,8 @@ class LeadEditController extends GetxController {
 
   Rx<Leads?> lead = Rx<Leads?>(null);
   RxBool isLoading = false.obs;
+  RxBool isDeleting = false.obs;
+
   RxString errorMessage = ''.obs;
 
   final nameController = TextEditingController();
@@ -37,14 +39,7 @@ class LeadEditController extends GetxController {
   RxString voiceFilePath = ''.obs;
 
 
-  @override
-  void onReady() {
-    super.onReady();
-    if (Get.arguments != null) {
-      final int leadId = Get.arguments;
-      fetchLeadForEdit(leadId);
-    }
-  }
+
 
 
 
@@ -114,6 +109,19 @@ class LeadEditController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // Future<void> deleteLead() async {
+  //   isDeleting.value = true;
+  //   try {
+  //     await _apiService.deleteLead(Get.arguments);
+  //     Get.snackbar('Success', 'Lead deleted successfully');
+  //   } catch (e) {
+  //     Get.snackbar('Error', e.toString());
+  //     print('the delete error is ${e.toString()}');
+  //   } finally {
+  //     isDeleting.value = false;
+  //   }
+  // }
 
   void resetForm() {
     lead.value = null;

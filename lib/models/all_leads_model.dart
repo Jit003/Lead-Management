@@ -1,3 +1,8 @@
+
+int? parseInt(dynamic value) => int.tryParse(value?.toString() ?? '');
+
+
+
 class AllLeadsList {
   String? status;
   String? message;
@@ -115,9 +120,9 @@ class Leads {
   });
 
   Leads.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    employeeId = json['employee_id'];
-    teamLeadId = json['team_lead_id'];
+    id = int.tryParse(json['id']?.toString() ?? '');
+    employeeId = int.tryParse(json['employee_id']?.toString() ?? '');
+    teamLeadId = int.tryParse(json['team_lead_id']?.toString() ?? '');
     name = json['name']?.toString();
     phone = json['phone']?.toString(); // Handle int or String
     email = json['email']?.toString();
@@ -129,7 +134,7 @@ class Leads {
     companyName = json['company_name']?.toString();
     leadAmount = json['lead_amount']?.toString(); // Handle int or String
     salary = json['salary']?.toString(); // Handle int or String
-    successPercentage = json['success_percentage'];
+    successPercentage = int.tryParse(json['success_percentage']?.toString() ?? '');
     expectedMonth = json['expected_month']?.toString();
     remarks = json['remarks']?.toString();
     status = json['status']?.toString();
@@ -212,7 +217,7 @@ class Employee {
   });
 
   Employee.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = int.tryParse(json['id']?.toString() ?? '');
     name = json['name']?.toString();
     email = json['email']?.toString();
     password = json['password']?.toString();
@@ -290,7 +295,7 @@ class TeamLead {
   });
 
   TeamLead.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = int.tryParse(json['id']?.toString() ?? '');
     name = json['name']?.toString();
     email = json['email']?.toString();
     password = json['password']?.toString();
@@ -303,7 +308,7 @@ class TeamLead {
     aadharCard = json['aadhar_card']?.toString();
     signature = json['signature']?.toString();
     createdBy = json['created_by']?.toString();
-    teamLeadId = json['team_lead_id'];
+    teamLeadId = int.tryParse(json['team_lead_id']?.toString() ?? '');
     createdAt = json['created_at']?.toString();
     updatedAt = json['updated_at']?.toString();
   }
@@ -410,7 +415,7 @@ class DisbursedLeads {
   DisbursedLeads({this.count, this.totalAmount});
 
   DisbursedLeads.fromJson(Map<String, dynamic> json) {
-    count = json['count'];
+    count = int.tryParse(json['count']?.toString() ?? '');
     totalAmount = json['total_amount']?.toString(); // Handle int or String
   }
 
