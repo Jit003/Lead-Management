@@ -86,6 +86,7 @@ class ApiService {
     );
 
     final data = json.decode(response.body);
+    print("the profile edit is ${response.body}");
     if (response.statusCode == 200 && data['status'] == 'success') {
       return {
         'success': true,
@@ -252,21 +253,19 @@ class ApiService {
   }
 
   // Get all tasks
-  Future<List<Task>> getTasks(String token) async {
+  static Future<List<Task>> getTasks(String token) async {
     try {
       final response = await http.get(
         Uri.parse('${ApiUrl.baseUrl}/api/tasks'),
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token', // Replace with actual auth token
+        },
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        if (jsonData['status'] == 'success') {
-          final List<dynamic> tasksJson = jsonData['data'];
-          return tasksJson.map((json) => Task.fromJson(json)).toList();
-        } else {
-          throw Exception('Failed to load tasks: ${jsonData['message']}');
-        }
+        print('the task error is ${response.body}');
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((task) => Task.fromJson(task)).toList();
       } else {
         throw Exception('Failed to load tasks: ${response.statusCode}');
       }
@@ -274,30 +273,52 @@ class ApiService {
       throw Exception('Error fetching tasks: $e');
     }
   }
-
   // Update task status and progress
 
-  static Future<bool> updateTask(
-      String taskId, Map<String, dynamic> body, String token) async {
-    final url = Uri.parse('${ApiUrl.baseUrl}/api/tasks/$taskId');
+// Update task
+  static Future<Map<String, dynamic>> updateTask({
+    required int taskId,
+    required String status,
+    required int progress,
+    required String token,
+    String? message,
+  }) async {
+    try {
+      final body = {
+        'status': status,
+        'progress': progress,
+        'message': message ?? "",
+      };
 
-    final response = await http.put(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json', // 👈 Add this
-      },
-      body: jsonEncode(body),
-    );
+      print("📤 UpdateTask Body: $body");
 
-    if (response.statusCode == 200) {
-      print('the task edit ${response.body}');
-      return true;
-    } else {
-      print("Update failed: ${response.body}");
-      return false;
+      final response = await http.put(
+        Uri.parse('${ApiUrl.baseUrl}/api/tasks/$taskId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(body),
+      );
+
+
+      final data = json.decode(response.body);
+
+
+      print("📡 UpdateTask Response [${response.statusCode}]: $data");
+
+      return {
+        "success": response.statusCode == 200,
+        "body": data,
+      };
+    } catch (e) {
+      print("❌ Error in updateTask: $e");
+      return {"success": false, "body": {"message": e.toString()}};
     }
   }
+
+
+
 
   static Future<AllLeavesModel?> getAllLeave(String token) async {
     try {
@@ -351,6 +372,7 @@ class ApiService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
+        print('the apply for leave error is ${response.body}');
         return ApplyLeaveResponse.fromJson(data);
       } else {
         print("Error while applying leave: ${response.statusCode}");

@@ -11,10 +11,17 @@ class ImagePickerController extends GetxController {
   void pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      pickedImagePath.value = picked.path; // ✅ Update this line
-      final file = File(picked.path);
-      profileController.uploadProfilePhoto(file);
+      pickedImagePath.value = picked.path;
+      // ❌ don’t upload here
     }
   }
 
+  void uploadPickedImage() {
+    if (pickedImagePath.isNotEmpty) {
+      final file = File(pickedImagePath.value);
+      profileController.uploadProfilePhoto(file);
+    } else {
+      Get.snackbar("Error", "No image selected");
+    }
+  }
 }

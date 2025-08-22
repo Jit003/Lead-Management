@@ -72,10 +72,8 @@ class _FutureLeadFormScreenState extends State<FutureLeadFormScreen> {
               ElevatedButton(
                 onPressed: () {
                   addLeadsController.createLead();
-                  Get.back();
                   // In a real app, you would process the form data here.
                   // For now, we'll just navigate back and show a snackbar.
-                  Get.snackbar('Success', 'Future Leads Saved');
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 18.0),

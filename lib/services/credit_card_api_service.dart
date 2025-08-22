@@ -9,7 +9,7 @@ class ApiService {
   static Future<LeadsResponse> getCreditCardLeads(String token) async {
     try {
       final response = await http.get(
-        Uri.parse('${ApiUrl.baseUrl}/api/leads?lead_type=creditcard_loan'),
+        Uri.parse('${ApiUrl.baseUrl}/api/leads?lead_type=creditcard_loan&expected_month=all'),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -20,10 +20,13 @@ class ApiService {
         print('the credit card leads are ${response.body}');
         return LeadsResponse.fromJson(jsonData);
       } else {
+        print('Failed to load leads: ${response.statusCode}');
         throw Exception('Failed to load leads: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error fetching leads: $e');
     }
   }
+
+
 }

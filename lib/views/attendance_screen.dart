@@ -169,9 +169,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         children: [
           _buildTodayStatusCard(controller),
           const SizedBox(height: 24),
-          _buildActionButton(controller, context),
+          Obx(() => _buildActionButton(controller, context)),
           const SizedBox(height: 24),
-          _buildLocationInfo(controller),
+          _buildSessionsInfo(controller),
           if (data != null && data.status == 'error')
             _buildRetryButton(controller),
         ],
@@ -334,6 +334,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         onPressed: controller.isLoading.value
             ? null
             : () async {
+          controller.isButtonLoading.value = true; // Start showing spinner
           final coordinates = await controller.getCurrentCoordinates();
           if (coordinates == null) {
             Get.snackbar(
@@ -400,6 +401,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               image: imageFile,
             );
           }
+          controller.isButtonLoading.value = false; // ✅ Moved after await
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
@@ -411,73 +413,94 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isCheckIn ? Icons.login : Icons.logout,
-              color: Colors.white,
-              size: 26,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              buttonLabel,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            if (controller.isButtonLoading.value == true)
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            else ...[
+              Icon(
+                isCheckIn ? Icons.login : Icons.logout,
                 color: Colors.white,
+                size: 26,
               ),
-            ),
+              const SizedBox(width: 10),
+              Text(
+                buttonLabel,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLocationInfo(AttendanceController controller) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.location_on, color: Color(0xFF3498DB), size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Current Location',
+  Widget _buildSessionsInfo(AttendanceController controller) {
+    return Obx(() => GestureDetector(
+      onTap: () {
+        controller.isSessionExpanded.toggle(); // toggle the expansion
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.punch_clock_rounded,
+                    color: Color(0xFF3498DB), size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Sessions ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  controller.isSessionExpanded.value
+                      ? Icons.expand_less
+                      : Icons.expand_more,
+                  color: Colors.black54,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (controller.isSessionExpanded.value)
+              const Text(
+                'Session details shown here...',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  fontSize: 14,
+                  color: Colors.black54,
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 8),
-          // Obx(() {
-          //   final data = controller.attendanceStatus.value;
-          //   print('LocationInfo: location=${data?}');
-          //   return Text(
-          //     data?.location ?? 'Fetching location...',
-          //     style: const TextStyle(
-          //       fontSize: 14,
-          //       color: Colors.black54,
-          //     ),
-          //   );
-          // }),
-        ],
+          ],
+        ),
       ),
-    );
+    ));
   }
 
   Widget _buildRetryButton(AttendanceController controller) {

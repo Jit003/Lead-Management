@@ -34,32 +34,40 @@ class LeaveController extends GetxController {
     try {
       isLoading(true);
 
-      // format dates before sending to API
+      // format dates
       String formattedStartDate =
-          DateFormat('yyyy-MM-dd').format(startDate.value!);
-      String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate.value!);
+      DateFormat('yyyy-MM-dd').format(startDate.value!);
+      String formattedEndDate =
+      DateFormat('yyyy-MM-dd').format(endDate.value!);
 
       print('the team lead id is ${authController.userData['team_lead_id']}');
 
+      print("Before API call...");
       final response = await ApiService.applyLeave(
         token: authController.token.value,
         leaveType: leaveType.value,
-        appliedTo: authController.userData['team_lead_id'],
+        appliedTo: int.tryParse(authController.userData['team_lead_id'].toString()) ?? 0,
         startDate: formattedStartDate,
         endDate: formattedEndDate,
         reason: reasonController.text.trim(),
       );
+      print("After API call...");
+
       if (response != null && response.status == "success") {
-        Get.snackbar("Success", response.message ?? "Leave applied successfully", backgroundColor: Colors.green);
+        print('Success response: ${response.message}');
+        Get.snackbar("Success", response.message ?? "Leave applied successfully",
+            backgroundColor: Colors.green);
         leaveType.close();
         startDate.close();
         endDate.close();
         reasonController.clear();
       } else {
-        Get.snackbar("Failed", response?.message ?? "Failed to apply leave", backgroundColor: Colors.red);
+        print("Failed response object: $response");
+        Get.snackbar("Failed", response?.message ?? "Failed to apply leave",
+            backgroundColor: Colors.red);
       }
-
     } catch (e) {
+      print("Caught error in applyForLeave: $e");
       Get.snackbar("Error", "An error occurred", backgroundColor: Colors.red);
     } finally {
       isLoading(false);

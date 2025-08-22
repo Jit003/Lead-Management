@@ -12,7 +12,10 @@ import 'package:shimmer/shimmer.dart';
 
 import '../controller/addleads_controller.dart';
 import '../controller/dashboard_controller.dart';
+import '../routes/app_routes.dart';
+import '../widgets/offer_banner.dart';
 import '../widgets/shimmer_widget.dart';
+import 'dashboard_lead_details_screen.dart';
 import 'emi_cal_page.dart';
 import 'filtered_leads_screens.dart';
 import 'future_leads_form_screen.dart';
@@ -62,114 +65,81 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
     final isTablet = screenWidth > 600;
     final horizontalPadding = isTablet ? 24.0 : 16.0;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: CustomScrollView(
-        slivers: [
-          // Enhanced Sliver App Bar
-          SliverAppBar(
-            expandedHeight: 100,
-            floating: true,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: AppColor.appBarColor,
-            automaticallyImplyLeading: false,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColor.appBarColor,
-                      AppColor.appBarColor,
-                    ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        await dashboardController.loadDashboardData();
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC) ,
+        body: CustomScrollView(
+          slivers: [
+            // Enhanced Sliver App Bar
+            SliverAppBar(
+              expandedHeight: 100,
+              floating: true,
+              pinned: true,
+              elevation: 0,
+              backgroundColor: AppColor.appBarColor,
+              automaticallyImplyLeading: false,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColor.appBarColor,
+                        AppColor.appBarColor,
+                      ],
+                    ),
                   ),
-                ),
-                child: Stack(
-                  children: [
-                    // Header Content
-                    Positioned(
-                      top: 50,
-                      left: horizontalPadding,
-                      right: horizontalPadding,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: _buildHeaderContent(),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: -20,
-                      right: -20,
-                      child: Container(
-                        width: 70,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.08),
-                        ),
-                      ),
-                    ),
-
-                    Positioned(
-                      top: 10,
-                      right: 60,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.05),
-                        ),
-                      ),
-                    ),
-
-                    Positioned(
-                      bottom: -10,
-                      left: -10,
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.06),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              Container(
-                margin: const EdgeInsets.only(right: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  onPressed: () {
-                   _showNotifications();
-                  },
-                  icon: Stack(
+                  child: Stack(
                     children: [
-                      const Icon(Icons.notifications_outlined,
-                          color: Colors.white, size: 24),
+                      // Header Content
                       Positioned(
-                        right: 0,
-                        top: 0,
+                        top: 50,
+                        left: horizontalPadding,
+                        right: horizontalPadding,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: _buildHeaderContent(),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: -20,
+                        right: -20,
                         child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
                           ),
-                          constraints:
-                              const BoxConstraints(minWidth: 1, minHeight: 1),
-                          child: const Text(
-                            '3',
-                            style: TextStyle(color: Colors.white, fontSize: 10),
-                            textAlign: TextAlign.center,
+                        ),
+                      ),
+      
+                      Positioned(
+                        top: 10,
+                        right: 60,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
+                          ),
+                        ),
+                      ),
+      
+                      Positioned(
+                        bottom: -10,
+                        left: -10,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.06),
                           ),
                         ),
                       ),
@@ -177,227 +147,244 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
                   ),
                 ),
               ),
-            ],
-          ),
-
-          // Dashboard Content
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding, vertical: 16),
-              child: Column(
-                children: [
-                  // Filter Section
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildFilterButton('ALL', 'all', Icons.all_inbox,
-                                Colors.blue, dashboardController),
-                            _buildFilterButton(
-                                'Personal Loan',
-                                'personal_loan',
-                                Icons.person,
-                                Colors.purple,
-                                dashboardController),
-                            _buildFilterButton(
-                                'Business Loan',
-                                'business_loan',
-                                Icons.business_center,
-                                Colors.green,
-                                dashboardController),
-                            _buildFilterButton('Home Loan', 'home_loan',
-                                Icons.home, Colors.orange, dashboardController),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // All Leads Card
-                      Obx(() =>
-                          buildAllLeadsCard(
-                            icon: Icons.analytics_outlined,
-                            totalLeadsTitle: "Total Leads",
-                            totalLeadsCount: "${dashboardController.dashboardData.value.data?.aggregates?.totalLeads?.count ?? '0'}",
-                            totalAmountTitle: "Total Amount",
-                            totalAmount: dashboardController.formatCurrency(
-                              dashboardController.dashboardData.value.data?.aggregates?.totalLeads?.totalAmount,
-                            ),
-                          )
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Month Dropdown
-                      _buildExpectedMonthDropdown(dashboardController),
-                    ],
+              actions: [
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-
-                  // Lead Status Section
-                  _buildEnhancedLeadStatusSection(isTablet),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColor.appBarColor.withOpacity(0.75),
-                          AppColor.appBarColor.withOpacity(0.75),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
+                  child: IconButton(
+                    onPressed: () {
+                     _showNotifications();
+                    },
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.notifications_outlined,
+                            color: Colors.white, size: 24),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints:
+                                const BoxConstraints(minWidth: 1, minHeight: 1),
+                            child: const Text(
+                              '3',
+                              style: TextStyle(color: Colors.white, fontSize: 10),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    child: Column(
+                  ),
+                ),
+              ],
+            ),
+      
+            // Dashboard Content
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding, vertical: 16),
+                child: Column(
+                  children: [
+                    // Filter Section
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Credit Card Statistics",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                        OfferBanner(),
+                        const SizedBox(height: 8),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _buildFilterButton('ALL', 'all', Icons.all_inbox,
+                                  Colors.blue, dashboardController),
+                              _buildFilterButton(
+                                  'Personal Loan',
+                                  'personal_loan',
+                                  Icons.person,
+                                  Colors.purple,
+                                  dashboardController),
+                              _buildFilterButton(
+                                  'Business Loan',
+                                  'business_loan',
+                                  Icons.business_center,
+                                  Colors.green,
+                                  dashboardController),
+                              _buildFilterButton('Home Loan', 'home_loan',
+                                  Icons.home, Colors.orange, dashboardController),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Obx(() => _buildStatColumn(
-                              "Ongoing",
-                              '${dashboardController.dashboardData.value.data?.leadTypeBreakdown?.creditcardLoan?.applied?.count ?? '0'}',
-                            )),
-
-                            Obx(() => _buildStatColumn(
-                              "Approved",
-                              '${dashboardController.dashboardData.value.data?.leadTypeBreakdown?.creditcardLoan?.approved?.count ?? '0'}',
-                            )),
-
-                            Obx(() => _buildStatColumn(
-                              "Rejected",
-                              '${dashboardController.dashboardData.value.data?.leadTypeBreakdown?.creditcardLoan?.rejected?.count ?? '0'}',
-                            )),
-
-
-                          ],
+                        const SizedBox(height: 20),
+      
+                        // All Leads Card
+                        Obx(() =>
+                            buildAllLeadsCard(
+                              icon: Icons.analytics_outlined,
+                              totalLeadsTitle: "Total Leads",
+                              totalLeadsCount: "${dashboardController.dashboardData.value.data?.aggregates?.totalLeads?.count ?? '0'}",
+                              totalAmountTitle: "Total Amount",
+                              totalAmount: dashboardController.formatCurrency(
+                                dashboardController.dashboardData.value.data?.aggregates?.totalLeads?.totalAmount,
+                              ),
+                            )
                         ),
+      
+                        const SizedBox(height: 16),
+      
+                        // Month Dropdown
+                        _buildExpectedMonthDropdown(dashboardController),
                       ],
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  _buildEnhancedLoanProductsSection(isTablet),
-
-
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => FutureLeadFormScreen(), arguments: 'future_lead');
-                    },
-                    child: Container(
-                      width: double.infinity, // Full width
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 20.0, horizontal: 20.0),
+      
+                    // Lead Status Section
+                    _buildEnhancedLeadStatusSection(isTablet),
+      
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
+                          colors: [
+                            AppColor.appBarColor.withOpacity(0.75),
+                            AppColor.appBarColor.withOpacity(0.75),
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white, // Changed to white
-                            Colors.purple.shade200, // Changed to a light purple
-                          ],
                         ),
-                        borderRadius: BorderRadius.circular(25.0),
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple.shade900.withOpacity(0.2), // Adjusted shadow for lighter background
-                            spreadRadius: 0,
-                            blurRadius: 20,
-                            offset: const Offset(0, 10), // changes position of shadow
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.person_add_alt_1, // Eye-catching icon
-                            color: Colors.deepPurple, // Adjusted icon color for lighter background
-                            size: 40.0,
-                          ),
-                          SizedBox(height: 15.0),
-                          Text(
-                            'Future Reference Lead', // Changed text
+                          const Text(
+                            "Credit Card Statistics",
                             style: TextStyle(
-                              color: Colors.deepPurple, // Adjusted text color for lighter background
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
-                          // Removed the subheading here
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Obx(() => _buildStatColumn(
+                                "Ongoing",
+                                '${dashboardController.dashboardData.value.data?.creditcardStatistics?.ongoing?.count ?? '0'}',
+                              )),
+      
+                              Obx(() => _buildStatColumn(
+                                "Approved",
+                                '${dashboardController.dashboardData.value.data?.creditcardStatistics?.approved?.count ?? '0'}',
+                              )),
+      
+                              Obx(() => _buildStatColumn(
+                                "Rejected",
+                                '${dashboardController.dashboardData.value.data?.creditcardStatistics?.rejected?.count ?? '0'}',
+                              )),
+      
+      
+                            ],
+                          ),
                         ],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  Obx(()=> buildFutureLeadsCard(
-                      'Future Reference Leads',
-                      '${dashboardController.dashboardData.value.data?.futureLeads?.count ?? '0'}',
-                      onViewAll: () {
-                        final controller = Get.find<AllLeadsController>();
-                        final futureLeads = controller.filteredLeads
-                            .where((lead) => lead.status?.toLowerCase() == 'future_lead')
-                            .toList();
-
-                        Get.to(() => FilteredLeadsScreen(), arguments: futureLeads);
-                      }
-
-
-                  ),),
-
-
-                  // Quick Actions Section
-                  _buildEnhancedQuickActionsSection(isTablet),
-
-                  // Recent Activities & Market Insights
-                  if (isTablet)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _buildRecentActivities()),
-                        const SizedBox(width: 16),
-                        Expanded(child: _buildMarketInsights()),
-                      ],
-                    )
-                  else ...[
-                    _buildRecentActivities(),
+                    const SizedBox(
+                      height: 20,
+                    ),
+      
+                    _buildEnhancedLoanProductsSection(isTablet),
+      
+      
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => FutureLeadFormScreen(), arguments: 'future_lead');
+                      },
+                      child: Container(
+                        width: double.infinity, // Full width
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20.0, horizontal: 20.0),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.white, // Changed to white
+                              Colors.purple.shade200, // Changed to a light purple
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.deepPurple.shade900.withOpacity(0.2), // Adjusted shadow for lighter background
+                              spreadRadius: 0,
+                              blurRadius: 20,
+                              offset: const Offset(0, 10), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_add_alt_1, // Eye-catching icon
+                              color: Colors.deepPurple, // Adjusted icon color for lighter background
+                              size: 40.0,
+                            ),
+                            SizedBox(height: 15.0),
+                            Text(
+                              'Future Reference Lead', // Changed text
+                              style: TextStyle(
+                                color: Colors.deepPurple, // Adjusted text color for lighter background
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            // Removed the subheading here
+                          ],
+                        ),
+                      ),
+                    ),
+      
+                    const SizedBox(
+                      height: 20,
+                    ),
+      
+                    Obx(()=> buildFutureLeadsCard(
+                        'Future Reference Leads',
+                        '${dashboardController.dashboardData.value.data?.futureLeads?.count ?? '0'}',
+                        onViewAll: () {
+                          Get.to(()=>FutureLeadsScreen());}
+      
+      
+                    ),),
+      
+      
+                    // Quick Actions Section
+                    _buildEnhancedQuickActionsSection(isTablet),
                   ],
-
-                  const SizedBox(height: 100),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -972,7 +959,7 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
         'icon': Icons.credit_score_outlined,
         'color': const Color(0xFF10B981),
         'onTap': () {
-          Get.to(() => const CreditCardLeadsListPage());
+          Get.to(() =>  CreditCardLeadsListPage());
         },
       },
       {
@@ -1076,6 +1063,10 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
     );
   }
 
+
+
+
+
   Widget _buildEnhancedLeadStatusSection(bool isTablet) {
     return Obx(() {
       if (dashboardController.isLoading.value) {
@@ -1098,6 +1089,7 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
       final aggregates =
           dashboardController.dashboardData.value.data?.aggregates;
 
+
       if (aggregates == null) {
         return const Center(child: Text('No data available'));
       }
@@ -1110,6 +1102,20 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
               aggregates.personalLeads?.totalAmount?.toString() ?? '0'),
           'icon': Icons.people_outline,
           'color': const Color(0xFF3B82F6),
+          'onTap': () {
+            final status = 'personal_lead'; // for Approved card
+            final leadType =dashboardController. selectedLeadType.value;
+
+            final filteredLeads =dashboardController. getLeadsByStatus(status);
+
+            Get.to(() => DashboardLeadDetailScreen(
+              title: 'Personal',
+              leads: filteredLeads,
+              leadType: leadType,
+            ));
+          }
+
+
         },
         {
           'title': 'Authorized',
@@ -1118,6 +1124,21 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
               aggregates.authorizedLeads?.totalAmount?.toString() ?? '0'),
           'icon': Icons.verified_user,
           'color': const Color(0xFF10B981),
+          'onTap': () {
+            final status = 'authorized'; // for Approved card
+            final leadType =dashboardController. selectedLeadType.value;
+
+            final filteredLeads =dashboardController. getLeadsByStatus(status);
+
+            Get.to(() => DashboardLeadDetailScreen(
+              title: 'Authorized',
+              leads: filteredLeads,
+              leadType: leadType,
+            ));
+          }
+
+
+
         },
         {
           'title': 'Login',
@@ -1126,6 +1147,20 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
               aggregates.loginLeads?.totalAmount?.toString() ?? '0'),
           'icon': Icons.login,
           'color': const Color(0xFFF59E0B),
+          'onTap': () {
+            final status = 'login'; // for Approved card
+            final leadType =dashboardController. selectedLeadType.value;
+
+            final filteredLeads =dashboardController. getLeadsByStatus(status);
+
+            Get.to(() => DashboardLeadDetailScreen(
+              title: 'Login',
+              leads: filteredLeads,
+              leadType: leadType,
+            ));
+          }
+
+
         },
         {
           'title': 'Approved',
@@ -1134,6 +1169,19 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
               aggregates.approvedLeads?.totalAmount?.toString() ?? '0'),
           'icon': Icons.check_circle,
           'color': const Color(0xFF059669),
+          'onTap': () {
+            final status = 'approved'; // for Approved card
+            final leadType =dashboardController. selectedLeadType.value;
+
+            final filteredLeads =dashboardController. getLeadsByStatus(status);
+
+            Get.to(() => DashboardLeadDetailScreen(
+              title: 'Approved',
+              leads: filteredLeads,
+              leadType: leadType,
+            ));
+          }
+
         },
         {
           'title': 'Disbursed',
@@ -1142,6 +1190,18 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
               aggregates.disbursedLeads?.totalAmount?.toString() ?? '0'),
           'icon': Icons.attach_money,
           'color': const Color(0xFF8B5CF6),
+          'onTap': () {
+            final status = 'disbursed'; // for Approved card
+            final leadType =dashboardController. selectedLeadType.value;
+
+            final filteredLeads =dashboardController. getLeadsByStatus(status);
+
+            Get.to(() => DashboardLeadDetailScreen(
+              title: 'Disbursed',
+              leads: filteredLeads,
+              leadType: leadType,
+            ));
+          }
         },
         {
           'title': 'Rejected',
@@ -1150,94 +1210,123 @@ class _EnhancedDashboardScreenState extends State<DashboardScreen>
               aggregates.rejectedLeads?.totalAmount?.toString() ?? '0'),
           'icon': Icons.cancel_outlined,
           'color': const Color(0xFFDC2626),
+          'onTap': () {
+            final status = 'rejected'; // for Approved card
+            final leadType =dashboardController. selectedLeadType.value;
+
+            final filteredLeads =dashboardController. getLeadsByStatus(status);
+
+            Get.to(() => DashboardLeadDetailScreen(
+              title: 'Rejected',
+              leads: filteredLeads,
+              leadType: leadType,
+            ));
+          }
+
+
         },
       ];
 
-      return Column(
-        children: [
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isTablet ? 4 : 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: isTablet ? 1.2 : 1.2,
-            ),
-            itemCount: leadStats.length,
-            itemBuilder: (context, index) {
-              final stat = leadStats[index];
-              return _buildEnhancedLeadStatCard(stat);
-            },
+      return RefreshIndicator(
+        onRefresh: () async {
+          await dashboardController.loadDashboardData();
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isTablet ? 4 : 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: isTablet ? 1.2 : 1.2,
+                ),
+                itemCount: leadStats.length,
+                itemBuilder: (context, index) {
+                  final stat = leadStats[index];
+                  return _buildEnhancedLeadStatCard(stat);
+                },
+              ),
+              // Credit Card Section
+            ],
           ),
-          // Credit Card Section
-        ],
+        ),
       );
     });
   }
 
   Widget _buildEnhancedLeadStatCard(Map<String, dynamic> stat) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade100, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                stat['count'].toString().padLeft(2, '0'),
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: stat['color'],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: stat['color'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  stat['icon'],
-                  color: stat['color'],
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "${stat['title']} Leads",
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF64748B),
-              fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: () {
+        if (stat['onTap'] != null) {
+          stat['onTap'](); // <-- ✅ this actually calls the function
+        }
+        print('clicked');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            stat['amount'],
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
+          ],
+          border: Border.all(color: Colors.grey.shade100, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  stat['count'].toString().padLeft(2, '0'),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold ,
+                    color: stat['color'],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: stat['color'].withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    stat['icon'],
+                    color: stat['color'],
+                    size: 20,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              "${stat['title']} Leads",
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              stat['amount'],
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -351,7 +351,9 @@ class EditProfileScreen extends StatelessWidget {
               ),
               child: CustomButton(
                 text: 'Save Changes',
-                onPressed: () => updateController.updateProfile(),
+                onPressed: () { updateController.updateProfile();
+                  controller.uploadPickedImage();
+                  },
               ),
             ),
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kredipal/controller/edit_lead_controller.dart';
+import 'package:kredipal/controller/wp_controller.dart';
 import 'package:kredipal/views/edit_lead_screen.dart';
 import 'package:kredipal/widgets/custom_app_bar.dart';
 import 'package:kredipal/widgets/custom_button.dart';
@@ -23,16 +24,10 @@ class LeadDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final LeadDetailsController controller = Get.put(LeadDetailsController());
     final LeadEditController editController = Get.put(LeadEditController());
-    ForwardDropdownController forwardDropdownController =
-        Get.put(ForwardDropdownController());
+    Get.put(ForwardDropdownController());
+    final WhatsappController wpController = Get.put(WhatsappController());
 
-    Future<void> makePhoneCall(String phoneNumber) async {
-      var _url = Uri.parse('tel:$phoneNumber');
-      if (!await launchUrl(_url, mode: LaunchMode.externalApplication)) {
-        Get.snackbar('Error', 'Could not launch phone call',
-            backgroundColor: Colors.red, colorText: Colors.white);
-      }
-    }
+
 
     return Obx(() {
       if (controller.isLoading.value) {
@@ -49,10 +44,16 @@ class LeadDetailsScreen extends StatelessWidget {
           actions: [
             Obx(() {
               final lead = controller.leadDetails.value;
-              if (lead?.isPersonalLead != true) return const SizedBox.shrink();
+
+              // If no lead data yet, don't show anything
+              if (lead == null) return const SizedBox.shrink();
+
+              // Show Edit button only for personal loan
+              if (lead.status != 'personal_lead') return const SizedBox.shrink();
+
               return TextButton(
                 onPressed: () {
-                  Get.to(() => EditLeadsPage(leadId: lead!.id!));
+                  Get.to(() => EditLeadsPage(leadId: lead.id ?? 0));
                 },
                 child: const Center(
                   child: Text(
@@ -64,7 +65,7 @@ class LeadDetailsScreen extends StatelessWidget {
                   ),
                 ),
               );
-            }),
+            })
           ],
         ),
         body: Obx(() {
@@ -227,50 +228,48 @@ class LeadDetailsScreen extends StatelessWidget {
                       child: CustomButton(
                         text: 'Call',
                         onPressed: () {
-                          makePhoneCall('+91${lead.phone}');
+                          wpController.makePhoneCall('+91${lead.phone}');
                         },
                       ),
                     ),
                     const SizedBox(width: 5),
-                    // Expanded(
-                    //   child: CustomButton(
-                    //     text: 'Follow Up',
-                    //     onPressed: () {
-                    //       Get.bottomSheet(
-                    //         FollowUpBottomSheet(leadId: lead.id.toString()),
-                    //         isScrollControlled: true,
-                    //         backgroundColor: Colors.white,
-                    //         shape: const RoundedRectangleBorder(
-                    //           borderRadius: BorderRadius.vertical(
-                    //               top: Radius.circular(20)),
-                    //         ),
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
-                    if (lead.isPersonalLead!) const SizedBox(width: 5),
-                    if (lead.isPersonalLead!)
+                    Expanded(
+                      child:CustomButton(
+                        text: 'Wp',
+                        onPressed: () {
+                          wpController.shareLeadMessage(
+                            phone: lead.phone, // Optional
+                          );
+                        },
+                      ),
+
+
+                    ),
+                    if (lead.status == 'personal_lead') const SizedBox(width: 5),
+                    if (lead.status == 'personal_lead')
                       Expanded(
                         child: CustomButton(
                           text: 'Delete',
                           onPressed: () {
                             Get.defaultDialog(
                               title: 'Delete Lead',
-                              middleText:
-                                  'Are you sure you want to delete this lead?',
+                              middleText: 'Are you sure you want to delete this lead?',
                               textCancel: 'Cancel',
                               textConfirm: 'Delete',
                               confirmTextColor: Colors.white,
                               buttonColor: Colors.red,
-                              onConfirm: () {
-                                print('Delete lead with ID: ${lead.id}');
-                                Get.back(); // Close dialog
-                                Get.back(); // Optionally close screen
+                              onConfirm: () async {
+                                if (lead.id == null) {
+                                  Get.snackbar('Error', 'Lead ID is missing');
+                                  return;
+                                }
+                                await editController.deleteLead(lead.id!);
                               },
                             );
                           },
                         ),
-                      ),
+                      )
+
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -286,6 +285,7 @@ class LeadDetailsScreen extends StatelessWidget {
                       forwardToId: forwardToId,
                       onResult: (msg) {
                         print("Forward responses: $msg");
+                        print("Forward team lead id : ${lead.teamLeadId}");
                       },
                     );
                   },

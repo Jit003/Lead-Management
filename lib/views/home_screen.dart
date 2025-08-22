@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
 
   final List<Widget> _pages = [
      DashboardScreen(),
-    const AllLeadsScreen(),
+     AllLeadsScreen(),
     AttendanceScreen(),
     ProfileScreen(),
 

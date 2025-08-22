@@ -23,6 +23,14 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
+
 
     <application
         android:label="Kredipal"

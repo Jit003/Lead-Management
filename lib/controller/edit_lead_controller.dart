@@ -81,6 +81,7 @@ class LeadEditController extends GetxController {
       "lead_amount": leadAmountController.text,
       "salary": salaryController.text,
       "remarks": remarksController.text ,
+      "expected_month":selectedMonth.value
     };
     // ✅ Add email only if it's not empty
     if (emailController.text.trim().isNotEmpty) {
@@ -110,18 +111,41 @@ class LeadEditController extends GetxController {
     }
   }
 
-  // Future<void> deleteLead() async {
-  //   isDeleting.value = true;
-  //   try {
-  //     await _apiService.deleteLead(Get.arguments);
-  //     Get.snackbar('Success', 'Lead deleted successfully');
-  //   } catch (e) {
-  //     Get.snackbar('Error', e.toString());
-  //     print('the delete error is ${e.toString()}');
-  //   } finally {
-  //     isDeleting.value = false;
-  //   }
-  // }
+  Future<bool> deleteLead(int leadId) async {
+    isDeleting.value = true;
+    try {
+      await _apiService.deleteLead(leadId);
+      await allLeadsController.fetchAllLeads(); // refresh list
+
+      // Show snackbar first
+      Get.snackbar('Success', 'Lead deleted successfully',
+        duration: const Duration(milliseconds: 800),
+      );
+
+      // Wait for snackbar to show before navigating
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // Close dialog if open
+      if (Get.isDialogOpen ?? false) {
+        Get.back(); // close confirmation dialog
+      }
+
+      // Go back to the previous screen
+      Get.back();
+
+      return true;
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+      print('Delete error: ${e.toString()}');
+      return false;
+    } finally {
+      isDeleting.value = false;
+    }
+  }
+
+
+
+
 
   void resetForm() {
     lead.value = null;

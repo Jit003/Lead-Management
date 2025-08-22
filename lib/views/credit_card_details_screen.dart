@@ -158,7 +158,7 @@ class CreditCardLeadDetailsPage extends StatelessWidget {
       'Personal Information',
       [
         _buildInfoRow('Name', lead.name),
-        _buildInfoRow('Email', lead.email),
+        _buildInfoRow('Email', lead.email ?? ''),
         _buildInfoRow('Phone', lead.phone),
         _buildInfoRow('Lead Type', lead.leadType.replaceAll('_', ' ').toUpperCase()),
         _buildInfoRow('Bank Name', lead.bankName),

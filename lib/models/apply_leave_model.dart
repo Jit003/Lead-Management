@@ -29,7 +29,7 @@ class Data {
   String? endDate;
   int? totalDays;
   String? reason;
-  int? appliedTo;
+  String? appliedTo;
   String? updatedAt;
   String? createdAt;
   int? id;

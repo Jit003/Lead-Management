@@ -10,7 +10,7 @@ class AllLeadsFilterBottomSheet extends StatelessWidget {
     'Lead Type': ['all', 'home_loan', 'business_loan', 'personal_loan'],
     'Lead Status': ['all', 'authorized', 'pending', 'approved', 'disbursed', 'rejected'],
     'Month': [
-      'All',
+      'all',
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ],

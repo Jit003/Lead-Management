@@ -46,7 +46,7 @@ class ForwardApiService {
   }
 
   static Future<Map<String, dynamic>?> getForwardStatus(int leadId) async {
-    final url = Uri.parse('https://crm.kredipal.com/api/leads/$leadId/forward-status');
+    final url = Uri.parse('${ApiUrl.baseUrl}/api/leads/$leadId/forward-status');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer ${_authController.token.value}'},

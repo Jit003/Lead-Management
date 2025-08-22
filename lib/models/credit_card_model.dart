@@ -4,7 +4,7 @@ class Lead {
   final int teamLeadId;
   final String name;
   final String phone;
-  final String email;
+  final String? email;
   final String? dob;
   final String? location;
   final String? companyName;

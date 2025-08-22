@@ -44,6 +44,21 @@ class DashboardController extends GetxController {
     }
   }
 
+  List<dynamic> getLeadsByStatus(String status) {
+    final leads = dashboardData.value.data?.allLeads ?? [];
+
+    if (status == 'all') return leads;
+
+    return leads.where((lead) => lead.status == status).toList();
+  }
+
+  List<dynamic> getFutureLeads() {
+    final leads = dashboardData.value.data?.allLeads ?? [];
+    return leads.where((lead) => lead.leadType == 'personal_loan').toList();
+  }
+
+
+
   String formatCurrency(dynamic amount) {
     if (amount == null) return '₹0';
 

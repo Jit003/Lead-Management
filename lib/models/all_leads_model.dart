@@ -230,7 +230,7 @@ class Employee {
     aadharCard = json['aadhar_card']?.toString();
     signature = json['signature']?.toString();
     createdBy = json['created_by']?.toString();
-    teamLeadId = json['team_lead_id'];
+    teamLeadId = int.tryParse(json['team_lead_id']?.toString() ?? '');
     createdAt = json['created_at']?.toString();
     updatedAt = json['updated_at']?.toString();
   }

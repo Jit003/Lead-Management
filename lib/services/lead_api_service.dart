@@ -116,6 +116,7 @@ class LeadsApiService extends getx.GetxService {
     try {
       final response = await _dio.post('/api/leads/$leadId', data: data);
       if (response.statusCode != 200 || response.data['status'] != 'success') {
+        print('Failed to update lead: ${response.data['message']}');
         throw Exception('Failed to update lead: ${response.data['message']}');
       }
     } catch (e) {

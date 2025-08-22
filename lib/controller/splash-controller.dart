@@ -15,20 +15,14 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeApp();
+  }
 
-    videoController = VideoPlayerController.asset(AppImages.splashVdo)
-      ..initialize().then((_) {
-        isInitialized.value = true;
-        videoController.play();
-        update();
+  Future<void> _initializeApp() async {
+    await Future.delayed(const Duration(seconds: 2)); // Optional splash delay
 
-        // Listen for video end
-        videoController.addListener(() {
-          if (videoController.value.position >= videoController.value.duration) {
-            navigateToNext();
-          }
-        });
-      });
+    isInitialized.value = true;
+    navigateToNext();
   }
 
   void navigateToNext() async {
@@ -37,6 +31,7 @@ class SplashController extends GetxController {
 
     if (token != null && token.isNotEmpty) {
       authController.token.value = token;
+      print('the splash screen token is $token');
 
       try {
         final profile = await ApiService.getUserProfile(token);

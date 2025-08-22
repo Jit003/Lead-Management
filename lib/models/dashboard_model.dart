@@ -25,15 +25,17 @@ class DashboardModel {
 class Data {
   User? user;
   Aggregates? aggregates;
-  LeadTypeBreakdown? leadTypeBreakdown;
-  AuthorizedLeads? futureLeads;
+  TotalLeads? futureLeads;
+  CreditcardStatistics? creditcardStatistics;
+  List<AllLeads>? allLeads;
   FiltersApplied? filtersApplied;
 
   Data(
       {this.user,
         this.aggregates,
-        this.leadTypeBreakdown,
         this.futureLeads,
+        this.creditcardStatistics,
+        this.allLeads,
         this.filtersApplied});
 
   Data.fromJson(Map<String, dynamic> json) {
@@ -41,12 +43,18 @@ class Data {
     aggregates = json['aggregates'] != null
         ? new Aggregates.fromJson(json['aggregates'])
         : null;
-    leadTypeBreakdown = json['lead_type_breakdown'] != null
-        ? new LeadTypeBreakdown.fromJson(json['lead_type_breakdown'])
-        : null;
     futureLeads = json['future_leads'] != null
-        ? new AuthorizedLeads.fromJson(json['future_leads'])
+        ? new TotalLeads.fromJson(json['future_leads'])
         : null;
+    creditcardStatistics = json['creditcard_statistics'] != null
+        ? new CreditcardStatistics.fromJson(json['creditcard_statistics'])
+        : null;
+    if (json['all_leads'] != null) {
+      allLeads = <AllLeads>[];
+      json['all_leads'].forEach((v) {
+        allLeads!.add(new AllLeads.fromJson(v));
+      });
+    }
     filtersApplied = json['filters_applied'] != null
         ? new FiltersApplied.fromJson(json['filters_applied'])
         : null;
@@ -60,11 +68,14 @@ class Data {
     if (this.aggregates != null) {
       data['aggregates'] = this.aggregates!.toJson();
     }
-    if (this.leadTypeBreakdown != null) {
-      data['lead_type_breakdown'] = this.leadTypeBreakdown!.toJson();
-    }
     if (this.futureLeads != null) {
       data['future_leads'] = this.futureLeads!.toJson();
+    }
+    if (this.creditcardStatistics != null) {
+      data['creditcard_statistics'] = this.creditcardStatistics!.toJson();
+    }
+    if (this.allLeads != null) {
+      data['all_leads'] = this.allLeads!.map((v) => v.toJson()).toList();
     }
     if (this.filtersApplied != null) {
       data['filters_applied'] = this.filtersApplied!.toJson();
@@ -94,15 +105,21 @@ class User {
 
 class Aggregates {
   TotalLeads? totalLeads;
+  TotalLeads? personalLoan;
+  TotalLeads? businessLoan;
+  TotalLeads? homeLoan;
   TotalLeads? personalLeads;
-  AuthorizedLeads? authorizedLeads;
-  AuthorizedLeads? loginLeads;
-  AuthorizedLeads? approvedLeads;
+  TotalLeads? authorizedLeads;
+  TotalLeads? loginLeads;
+  TotalLeads? approvedLeads;
   TotalLeads? disbursedLeads;
   TotalLeads? rejectedLeads;
 
   Aggregates(
       {this.totalLeads,
+        this.personalLoan,
+        this.businessLoan,
+        this.homeLoan,
         this.personalLeads,
         this.authorizedLeads,
         this.loginLeads,
@@ -114,17 +131,26 @@ class Aggregates {
     totalLeads = json['total_leads'] != null
         ? new TotalLeads.fromJson(json['total_leads'])
         : null;
+    personalLoan = json['personal_loan'] != null
+        ? new TotalLeads.fromJson(json['personal_loan'])
+        : null;
+    businessLoan = json['business_loan'] != null
+        ? new TotalLeads.fromJson(json['business_loan'])
+        : null;
+    homeLoan = json['home_loan'] != null
+        ? new TotalLeads.fromJson(json['home_loan'])
+        : null;
     personalLeads = json['personal_leads'] != null
         ? new TotalLeads.fromJson(json['personal_leads'])
         : null;
     authorizedLeads = json['authorized_leads'] != null
-        ? new AuthorizedLeads.fromJson(json['authorized_leads'])
+        ? new TotalLeads.fromJson(json['authorized_leads'])
         : null;
     loginLeads = json['login_leads'] != null
-        ? new AuthorizedLeads.fromJson(json['login_leads'])
+        ? new TotalLeads.fromJson(json['login_leads'])
         : null;
     approvedLeads = json['approved_leads'] != null
-        ? new AuthorizedLeads.fromJson(json['approved_leads'])
+        ? new TotalLeads.fromJson(json['approved_leads'])
         : null;
     disbursedLeads = json['disbursed_leads'] != null
         ? new TotalLeads.fromJson(json['disbursed_leads'])
@@ -138,6 +164,15 @@ class Aggregates {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     if (this.totalLeads != null) {
       data['total_leads'] = this.totalLeads!.toJson();
+    }
+    if (this.personalLoan != null) {
+      data['personal_loan'] = this.personalLoan!.toJson();
+    }
+    if (this.businessLoan != null) {
+      data['business_loan'] = this.businessLoan!.toJson();
+    }
+    if (this.homeLoan != null) {
+      data['home_loan'] = this.homeLoan!.toJson();
     }
     if (this.personalLeads != null) {
       data['personal_leads'] = this.personalLeads!.toJson();
@@ -163,7 +198,7 @@ class Aggregates {
 
 class TotalLeads {
   int? count;
-  dynamic totalAmount;
+  String? totalAmount;
 
   TotalLeads({this.count, this.totalAmount});
 
@@ -180,102 +215,66 @@ class TotalLeads {
   }
 }
 
-class AuthorizedLeads {
+class CreditcardStatistics {
+  Ongoing? ongoing;
+  Ongoing? approved;
+  Ongoing? rejected;
+  Ongoing? future;
+
+  CreditcardStatistics(
+      {this.ongoing, this.approved, this.rejected, this.future});
+
+  CreditcardStatistics.fromJson(Map<String, dynamic> json) {
+    ongoing =
+    json['ongoing'] != null ? new Ongoing.fromJson(json['ongoing']) : null;
+    approved = json['approved'] != null
+        ? new Ongoing.fromJson(json['approved'])
+        : null;
+    rejected = json['rejected'] != null
+        ? new Ongoing.fromJson(json['rejected'])
+        : null;
+    future =
+    json['future'] != null ? new Ongoing.fromJson(json['future']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.ongoing != null) {
+      data['ongoing'] = this.ongoing!.toJson();
+    }
+    if (this.approved != null) {
+      data['approved'] = this.approved!.toJson();
+    }
+    if (this.rejected != null) {
+      data['rejected'] = this.rejected!.toJson();
+    }
+    if (this.future != null) {
+      data['future'] = this.future!.toJson();
+    }
+    return data;
+  }
+}
+
+class Ongoing {
   int? count;
-  dynamic totalAmount;
 
-  AuthorizedLeads({this.count, this.totalAmount});
+  Ongoing({this.count});
 
-  AuthorizedLeads.fromJson(Map<String, dynamic> json) {
+  Ongoing.fromJson(Map<String, dynamic> json) {
     count = json['count'];
-    totalAmount = json['total_amount'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['count'] = this.count;
-    data['total_amount'] = this.totalAmount;
     return data;
   }
 }
 
-class LeadTypeBreakdown {
-  PersonalLoan? personalLoan;
-  BusinessLoan? businessLoan;
-  PersonalLoan? homeLoan;
-  CreditcardLoan? creditcardLoan;
-
-  LeadTypeBreakdown(
-      {this.personalLoan,
-        this.businessLoan,
-        this.homeLoan,
-        this.creditcardLoan});
-
-  LeadTypeBreakdown.fromJson(Map<String, dynamic> json) {
-    personalLoan = json['personal_loan'] != null
-        ? new PersonalLoan.fromJson(json['personal_loan'])
-        : null;
-    businessLoan = json['business_loan'] != null
-        ? new BusinessLoan.fromJson(json['business_loan'])
-        : null;
-    homeLoan = json['home_loan'] != null
-        ? new PersonalLoan.fromJson(json['home_loan'])
-        : null;
-    creditcardLoan = json['creditcard_loan'] != null
-        ? new CreditcardLoan.fromJson(json['creditcard_loan'])
-        : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.personalLoan != null) {
-      data['personal_loan'] = this.personalLoan!.toJson();
-    }
-    if (this.businessLoan != null) {
-      data['business_loan'] = this.businessLoan!.toJson();
-    }
-    if (this.homeLoan != null) {
-      data['home_loan'] = this.homeLoan!.toJson();
-    }
-    if (this.creditcardLoan != null) {
-      data['creditcard_loan'] = this.creditcardLoan!.toJson();
-    }
-    return data;
-  }
-}
-
-class PersonalLoan {
-  int? count;
-  dynamic totalAmount;
-  List<Leads>? leads;
-
-  PersonalLoan({this.count, this.totalAmount, this.leads});
-
-  PersonalLoan.fromJson(Map<String, dynamic> json) {
-    count = json['count'];
-    totalAmount = json['total_amount'];
-    if (json['leads'] != null) {
-      leads = <Leads>[];
-      json['leads'].forEach((v) {
-        leads!.add(new Leads.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['count'] = this.count;
-    data['total_amount'] = this.totalAmount;
-    if (this.leads != null) {
-      data['leads'] = this.leads!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Leads {
+class AllLeads {
   int? id;
   String? name;
+  String? leadType;
   String? leadAmount;
   String? status;
   String? expectedMonth;
@@ -283,9 +282,10 @@ class Leads {
   String? location;
   Employee? employee;
 
-  Leads(
+  AllLeads(
       {this.id,
         this.name,
+        this.leadType,
         this.leadAmount,
         this.status,
         this.expectedMonth,
@@ -293,9 +293,10 @@ class Leads {
         this.location,
         this.employee});
 
-  Leads.fromJson(Map<String, dynamic> json) {
+  AllLeads.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
+    leadType = json['lead_type'];
     leadAmount = json['lead_amount'];
     status = json['status'];
     expectedMonth = json['expected_month'];
@@ -310,6 +311,7 @@ class Leads {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
+    data['lead_type'] = this.leadType;
     data['lead_amount'] = this.leadAmount;
     data['status'] = this.status;
     data['expected_month'] = this.expectedMonth;
@@ -355,92 +357,18 @@ class Employee {
   }
 }
 
-class BusinessLoan {
-  int? count;
-  dynamic totalAmount;
-  List<Leads>? leads; // ✅ Change here
-
-  BusinessLoan({this.count, this.totalAmount, this.leads});
-
-  BusinessLoan.fromJson(Map<String, dynamic> json) {
-    count = json['count'];
-    totalAmount = json['total_amount'];
-    if (json['leads'] != null) {
-      leads = <Leads>[];
-      json['leads'].forEach((v) {
-        leads!.add(Leads.fromJson(v)); // ✅ Correct usage
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['count'] = count;
-    data['total_amount'] = totalAmount;
-    if (leads != null) {
-      data['leads'] = leads!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-
-class CreditcardLoan {
-  AuthorizedLeads? applied;
-  AuthorizedLeads? approved;
-  AuthorizedLeads? rejected;
-
-  CreditcardLoan({this.applied, this.approved, this.rejected});
-
-  CreditcardLoan.fromJson(Map<String, dynamic> json) {
-    applied = json['applied'] != null
-        ? new AuthorizedLeads.fromJson(json['applied'])
-        : null;
-    approved = json['approved'] != null
-        ? new AuthorizedLeads.fromJson(json['approved'])
-        : null;
-    rejected = json['rejected'] != null
-        ? new AuthorizedLeads.fromJson(json['rejected'])
-        : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.applied != null) {
-      data['applied'] = this.applied!.toJson();
-    }
-    if (this.approved != null) {
-      data['approved'] = this.approved!.toJson();
-    }
-    if (this.rejected != null) {
-      data['rejected'] = this.rejected!.toJson();
-    }
-    return data;
-  }
-}
-
 class FiltersApplied {
   String? leadType;
   String? status;
-  String? dateFilter;
-  String? startDate;
-  String? endDate;
+  int? year;
   String? expectedMonth;
 
-  FiltersApplied(
-      {this.leadType,
-        this.status,
-        this.dateFilter,
-        this.startDate,
-        this.endDate,
-        this.expectedMonth});
+  FiltersApplied({this.leadType, this.status, this.year, this.expectedMonth});
 
   FiltersApplied.fromJson(Map<String, dynamic> json) {
     leadType = json['lead_type'];
     status = json['status'];
-    dateFilter = json['date_filter'];
-    startDate = json['start_date'];
-    endDate = json['end_date'];
+    year = json['year'];
     expectedMonth = json['expected_month'];
   }
 
@@ -448,9 +376,7 @@ class FiltersApplied {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['lead_type'] = this.leadType;
     data['status'] = this.status;
-    data['date_filter'] = this.dateFilter;
-    data['start_date'] = this.startDate;
-    data['end_date'] = this.endDate;
+    data['year'] = this.year;
     data['expected_month'] = this.expectedMonth;
     return data;
   }

@@ -129,6 +129,21 @@ class AllLeadsController extends GetxController {
     );
   }
 
+  void navigateToFutureLeads() {
+    Get.toNamed(
+      AppRoutes.allLead,
+      arguments: {
+        'leadType': null,
+        'status': 'future_lead',
+        'expectedMonth': 'all',
+      },
+    );
+  }
+
+
+
+
+
 
 
 

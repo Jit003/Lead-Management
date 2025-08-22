@@ -16,11 +16,26 @@ class LeadDetailsController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    final Leads? lead = Get.arguments as Leads?;
-    if (lead != null) {
-      fetchLeadDetails(lead.id!); // ← always fetch from API
+
+    final dynamic arg = Get.arguments;
+
+    if (arg is Leads) {
+      // Full object passed
+      fetchLeadDetails(arg.id!);
+    } else if (arg is int) {
+      // Only ID passed
+      fetchLeadDetails(arg);
+    } else {
+      // Invalid argument
+      errorMessage.value = 'Invalid lead argument passed.';
+      Get.snackbar(
+        'Error',
+        'Could not load lead details. Invalid argument.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
+
 
 
   Future<void> fetchLeadDetails(int leadId) async {

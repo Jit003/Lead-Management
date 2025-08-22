@@ -14,6 +14,10 @@ class AttendanceController extends GetxController {
 
   Rx<AttendanceStatus?> attendanceStatus = Rx<AttendanceStatus?>(null);
   RxBool isLoading = false.obs;
+  RxBool isButtonLoading = false.obs;
+  RxBool isSessionExpanded = false.obs;
+
+
 
   RxInt checkInId = 0.obs;
 
@@ -181,7 +185,7 @@ class AttendanceController extends GetxController {
     if (response != null && response['status'] == 'success') {
       checkInId.value = 0;
       await fetchAttendanceStatus();
-      Get.snackbar('Success','checkOut',backgroundColor: Colors.red);
+      Get.snackbar('Success','checkOut',backgroundColor: Colors.green);
     }
 
     isLoading.value = false;

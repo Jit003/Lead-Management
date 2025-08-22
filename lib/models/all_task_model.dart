@@ -1,82 +1,91 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 class Task {
-  final int id;
-  final int teamLeadId;
-  final int employeeId;
   final String title;
   final String description;
+  final String assignedDate;
+  final String dueDate;
+  final String priority;
+  final List<String>? attachments;
+  final int taskId;
+  final int userId;
   final String status;
+  final String progress;
+  final String? completedAt;
   final String createdAt;
   final String updatedAt;
-  final int progress;
-  final String priority;
-  final List<ActivityItem> activityTimeline;
-  final String assignedDate;
-  final String? dueDate;
-  final List<String>? attachments;
-  final Employee employee;
-  final TeamLead teamLead;
+  final String? message;
 
   Task({
-    required this.id,
-    required this.teamLeadId,
-    required this.employeeId,
     required this.title,
     required this.description,
+    required this.assignedDate,
+    required this.dueDate,
+    required this.priority,
+    this.attachments,
+    required this.taskId,
+    required this.userId,
     required this.status,
+    required this.progress,
+    this.completedAt,
     required this.createdAt,
     required this.updatedAt,
-    required this.progress,
-    required this.priority,
-    required this.activityTimeline,
-    required this.assignedDate,
-    this.dueDate,
-    this.attachments,
-    required this.employee,
-    required this.teamLead,
+    this.message,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
-    // Parse activity timeline
-    List<ActivityItem> timeline = [];
-    if (json['activity_timeline'] != null) {
-      final List<dynamic> timelineJson = jsonDecode(json['activity_timeline']);
-      timeline = timelineJson.map((item) => ActivityItem.fromJson(item)).toList();
-    }
-
     // Parse attachments
     List<String>? attachments;
     if (json['attachments'] != null && json['attachments'] != "null") {
-      final List<dynamic> attachmentsJson = jsonDecode(json['attachments']);
-      attachments = attachmentsJson.map((item) => item.toString()).toList();
+      try {
+        final List<dynamic> attachmentsJson = jsonDecode(json['attachments']);
+        attachments = attachmentsJson.map((item) => item.toString()).toList();
+      } catch (e) {
+        attachments = null;
+      }
     }
 
     return Task(
-      id: json['id'],
-      teamLeadId: json['team_lead_id'],
-      employeeId: json['employee_id'],
-      title: json['title'],
-      description: json['description'],
-      status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      progress: json['progress'],
-      priority: json['priority'],
-      activityTimeline: timeline,
-      assignedDate: json['assigned_date'],
-      dueDate: json['due_date'],
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      assignedDate: json['assigned_date'] ?? '',
+      dueDate: json['due_date'] ?? '',
+      priority: json['priority'] ?? 'medium',
       attachments: attachments,
-      employee: Employee.fromJson(json['employee']),
-      teamLead: TeamLead.fromJson(json['team_lead']),
+      taskId: json['task_id'] ?? 0,
+      userId: json['user_id'] ?? 0,
+      status: json['status'] ?? 'pending',
+      progress: json['progress']?.toString() ?? '0',
+      completedAt: json['completed_at'],
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+      message: json['message'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'assigned_date': assignedDate,
+      'due_date': dueDate,
+      'priority': priority,
+      'attachments': attachments != null ? jsonEncode(attachments) : null,
+      'task_id': taskId,
+      'user_id': userId,
+      'status': status,
+      'progress': progress,
+      'completed_at': completedAt,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'message': message,
+    };
   }
 
   // Helper method to get status color
   Color getStatusColor() {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'completed':
         return Colors.green;
       case 'in_progress':
@@ -90,7 +99,9 @@ class Task {
 
   // Helper method to get priority color
   Color getPriorityColor() {
-    switch (priority) {
+    switch (priority.toLowerCase()) {
+      case 'urgent':
+        return Colors.red.shade700;
       case 'high':
         return Colors.red;
       case 'medium':
@@ -107,103 +118,27 @@ class Task {
     return status.replaceAll('_', ' ').toUpperCase();
   }
 
+  // Helper method to get progress as integer
+  int get progressInt {
+    return int.tryParse(progress) ?? 0;
+  }
+
   // Helper method to get remaining days
   int? getRemainingDays() {
-    if (dueDate == null) return null;
+    if (dueDate.isEmpty) return null;
 
-    final due = DateTime.parse(dueDate!);
-    final now = DateTime.now();
-    return due.difference(now).inDays;
-  }
-}
-
-class ActivityItem {
-  final String timestamp;
-  final String action;
-  final int by;
-  final String note;
-  final List<String>? fieldsChanged;
-
-  ActivityItem({
-    required this.timestamp,
-    required this.action,
-    required this.by,
-    required this.note,
-    this.fieldsChanged,
-  });
-
-  factory ActivityItem.fromJson(Map<String, dynamic> json) {
-    List<String>? fields;
-    if (json['fields_changed'] != null) {
-      fields = List<String>.from(json['fields_changed']);
+    try {
+      final due = DateTime.parse(dueDate);
+      final now = DateTime.now();
+      return due.difference(now).inDays;
+    } catch (e) {
+      return null;
     }
+  }
 
-    return ActivityItem(
-      timestamp: json['timestamp'],
-      action: json['action'],
-      by: json['by'],
-      note: json['note'],
-      fieldsChanged: fields,
-    );
+  // Helper method to check if task is overdue
+  bool get isOverdue {
+    final remainingDays = getRemainingDays();
+    return remainingDays != null && remainingDays < 0 && status != 'completed';
   }
 }
-
-class Employee {
-  final int id;
-  final String name;
-  final String email;
-  final String phone;
-  final String designation;
-  final String? profilePhoto;
-
-  Employee({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.designation,
-    this.profilePhoto,
-  });
-
-  factory Employee.fromJson(Map<String, dynamic> json) {
-    return Employee(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'] ?? '',
-      designation: json['designation'] ?? '',
-      profilePhoto: json['profile_photo'],
-    );
-  }
-}
-
-class TeamLead {
-  final int id;
-  final String name;
-  final String email;
-  final String phone;
-  final String designation;
-  final String? profilePhoto;
-
-  TeamLead({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.designation,
-    this.profilePhoto,
-  });
-
-  factory TeamLead.fromJson(Map<String, dynamic> json) {
-    return TeamLead(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'] ?? '',
-      designation: json['designation'] ?? '',
-      profilePhoto: json['profile_photo'],
-    );
-  }
-}
-
-// Don't forget to import this at the top

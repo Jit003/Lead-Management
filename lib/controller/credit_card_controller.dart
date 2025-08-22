@@ -7,6 +7,9 @@ class CreditLeadsController extends GetxController {
   var isLoading = false.obs;
   var leads = <Lead>[].obs;
   var errorMessage = ''.obs;
+  var errorMessageForFuture = ''.obs;
+
+  var isLoadingForFuture = false.obs;
   final AuthController authController = Get.find<AuthController>();
 
 
@@ -25,8 +28,10 @@ class CreditLeadsController extends GetxController {
         authController.token.value
       );
       leads.value = response.data.leads;
+      print('the credit card leads are ${response}');
     } catch (e) {
       errorMessage.value = e.toString();
+      print('the credit card error is $e');
       Get.snackbar(
         'Error',
         'Failed to fetch leads: $e',
@@ -36,6 +41,8 @@ class CreditLeadsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+
 
   Future<void> refreshLeads() async {
     await fetchCreditCardLeads();

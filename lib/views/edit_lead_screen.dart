@@ -239,14 +239,14 @@ class _EditLeadsPageState extends State<EditLeadsPage> {
         ),
 
         const SizedBox(height: 20),
-        // Obx(() => _buildModernDropdown(
-        //   label: 'Expected Month',
-        //   value: editController.selectedMonth.value,
-        //   items: addLeadsController.expectedMonth,
-        //   onChanged: (val) {
-        //     editController.selectedMonth.value = val ?? '';
-        //   },
-        // )),
+        Obx(() => _buildModernDropdown(
+          label: 'Expected Month',
+          value: editController.selectedMonth.value,
+          items: addLeadsController.expectedMonth,
+          onChanged: (val) {
+            editController.selectedMonth.value = val ?? '';
+          },
+        )),
         const SizedBox(height: 20),
         _buildModernTextField(
           label: 'Remarks',

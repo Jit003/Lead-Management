@@ -26,14 +26,14 @@ class AllLeavesModel {
 
 class Leaves {
   int? id;
-  int? userId;
+  String? userId;
   String? leaveType;
   String? startDate;
   String? endDate;
   String? reason;
   String? status;
-  int? appliedTo;
-  int? totalDays;
+  String? appliedTo;
+  String? totalDays;
   String? createdAt;
   String? updatedAt;
 

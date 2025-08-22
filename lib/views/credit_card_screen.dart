@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kredipal/widgets/custom_app_bar.dart';
 
+import '../controller/allleads_controller.dart';
 import '../controller/credit_card_controller.dart';
 import '../models/credit_card_model.dart';
 import 'credit_card_details_screen.dart';
@@ -12,6 +13,7 @@ class CreditCardLeadsListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CreditLeadsController controller = Get.put(CreditLeadsController());
+
 
     return Scaffold(
       appBar: CustomAppBar(title: 'Credit Crad Leads'),
@@ -132,7 +134,7 @@ class CreditCardLeadsListPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        lead.email,
+                        lead.email ?? '',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade600,

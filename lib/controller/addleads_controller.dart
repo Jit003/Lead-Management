@@ -342,6 +342,7 @@ class AddLeadsController extends GetxController {
           "it_return": itReturnController.text.trim(),
           "vintage_year":
               selectedVintageYear.value, // New field, parsed as integer
+          "expected_month": selectedMonth.value,
           "success_percentage":
               (int.tryParse(selectedSuccessRatio.value) ?? 0).toString(),
           "remarks": remarksController.text.trim(),
@@ -353,14 +354,12 @@ class AddLeadsController extends GetxController {
           "email": emailController.text.trim(),
           "bank_names": selectedBanks.toList(),
         });
-      }
-      else if (leadType == 'future_lead') {
+      } else if (leadType == 'future_lead') {
         body.addAll({
           "name": nameController.text.trim(),
           "phone": phoneController.text.trim(),
-          "email":emailController.text.trim(),
+          "email": emailController.text.trim(),
           "location": locationController.text.trim()
-
         });
       }
 
@@ -377,10 +376,12 @@ class AddLeadsController extends GetxController {
 
       clearForm(leadType: leadTypeValue.value);
       if (leadType == 'future_lead') {
-        Get.back(); // 👈 custom future lead screen
+        Get.snackbar('Success', 'Future Leads Saved');
       } else {
-        Get.toNamed(AppRoutes.leadSavedSuccess);  // 👈 default lead success screen
-      }      allLeadsController.fetchAllLeads();
+        Get.toNamed(
+            AppRoutes.leadSavedSuccess); // 👈 default lead success screen
+      }
+      allLeadsController.fetchAllLeads();
       dashboardController.loadDashboardData();
     } catch (e) {
       print("Error during createLead: $e");
@@ -419,6 +420,7 @@ class AddLeadsController extends GetxController {
     emailController.dispose();
     locationController.dispose();
     companyNameController.dispose();
+    selectedState.close();
     leadAmountController.dispose();
     salaryController.dispose();
     businessBudgetController.dispose();

@@ -41,7 +41,7 @@ class ForwardDropdownController extends GetxController {
     final data = await ForwardApiService.getForwardStatus(leadId);
     if (data != null) {
       isForwarded.value = data['is_forwarded'] ?? false;
-      receiverUserId.value = data['receiver_user_id'];
+      receiverUserId.value = int.tryParse(data['receiver_user_id'].toString()) ?? 0;
       receiverDesignation.value = data['receiver_designation'] ?? '';
 
       if (isForwarded.value && selectedOption.value == null) {

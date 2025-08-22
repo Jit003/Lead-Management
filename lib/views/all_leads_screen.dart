@@ -6,7 +6,9 @@ import '../models/all_leads_model.dart';
 import '../widgets/expected_month_bottom_sheet.dart';
 
 class AllLeadsScreen extends StatelessWidget {
-  const AllLeadsScreen({Key? key}) : super(key: key);
+
+
+  const AllLeadsScreen({Key? key,}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +129,7 @@ class AllLeadsScreen extends StatelessWidget {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  controller.selectedMonth.value = 'All';
+                  controller.selectedMonth.value = 'all';
                   controller.selectedLeadType.value = 'All';
                   controller.selectedStatus.value = 'all';
                   await controller.fetchAllLeads();
